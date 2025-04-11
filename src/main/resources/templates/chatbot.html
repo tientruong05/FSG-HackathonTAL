@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack GPT - Trò chuyện với Chatbot Tâm lý</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+    <style>
+      .chat-container {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        background-color: #4a8f7b;
+        color: #fff;
+        padding: 15px;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+      }
+
+      .chat-header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .chat-messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: #f1f3f5;
+      }
+
+      .message {
+        max-width: 70%;
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        border-radius: 10px;
+        display: inline-block;
+        word-break: break-word; /* Ngắt dòng tự động khi văn bản dài */
+        overflow-wrap: break-word; /* Hỗ trợ ngắt từ */
+        white-space: pre-wrap; /* Giữ định dạng và ngắt dòng tự nhiên */
+      }
+
+      .bot-message {
+        background-color: #e9ecef;
+        color: #333;
+        align-self: flex-start;
+      }
+
+      .user-message {
+        background-color: #4a8f7b;
+        color: #fff;
+        align-self: flex-end;
+      }
+
+      .chat-input {
+        padding: 15px;
+        border-top: 1px solid #e6e6e6;
+        background-color: #fff;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+      }
+
+      .message-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .message-container.user {
+        align-items: flex-end;
+      }
+
+      .message-container.bot {
+        align-items: flex-start;
+      }
+
+      .message-time {
+        font-size: 0.8em;
+        margin-top: 2px;
+        color: #6c757d;
+      }
+
+      .system-message {
+        text-align: center;
+        margin: 10px auto;
+        color: #6c757d;
+        font-style: italic;
+      }
+
+      .typing-indicator {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        max-width: 100px;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        float: left;
+        margin: 0 1px;
+        background-color: #333;
+        display: block;
+        border-radius: 50%;
+        opacity: 0.4;
+      }
+
+      .typing-indicator span:nth-of-type(1) {
+        animation: 1s blink infinite 0.3333s;
+      }
+
+      .typing-indicator span:nth-of-type(2) {
+        animation: 1s blink infinite 0.6666s;
+      }
+
+      .typing-indicator span:nth-of-type(3) {
+        animation: 1s blink infinite 0.9999s;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .clear-chat-btn {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <!-- Thêm doctors-modal -->
+    <th:block
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></th:block>
+
+    <div class="chat-container">
+      <div class="chat-header">
+        <img
+          src="https://i.postimg.cc/RFW6cxPr/logo-Full-Stack-GPT.png"
+          alt="Chatbot"
+        />
+        <span>Trò chuyện với Chatbot Tâm lý</span>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <!-- Ban đầu hiển thị tin nhắn chào mừng -->
+        <div class="message-container bot">
+          <div class="message bot-message" th:text="${welcomeMessage}">
+            Xin chào! Tôi là chatbot tâm lý, tôi có thể giúp gì cho bạn hôm nay?
+          </div>
+          <div class="message-time">
+            <script>
+              document.write(
+                new Date().toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })
+              );
+            </script>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <form id="chatForm">
+          <div class="input-group">
+            <input
+              type="text"
+              class="chat-input-field"
+              id="chatInput"
+              name="messageContent"
+              placeholder="Nhập tin nhắn..."
+              autocomplete="off"
+            />
+            <button class="chat-send-button" type="submit">
+              <i class="bi bi-send"></i>
+            </button>
+          </div>
+        </form>
+        <div class="clear-chat text-end">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger clear-chat-btn"
+            onclick="clearChat()"
+          >
+            Xóa cuộc trò chuyện
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <audio
+      id="notificationSound"
+      src="/sounds/notification.mp3"
+      preload="auto"
+    ></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Thêm hàm openDoctorModal -->
+    <script>
+      window.openDoctorModal = function () {
+        console.log("Opening doctor modal with global function");
+        const modalElement = document.getElementById("doctorSelectionModal");
+        if (modalElement) {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+          const loadingIndicator =
+            document.getElementById("doctorModalLoading");
+          const contentArea = document.getElementById("doctorModalBodyContent");
+
+          if (!loadingIndicator || !contentArea) {
+            console.error("Modal loading or content area not found!");
+            return;
+          }
+
+          // Show loading indicator and hide content
+          loadingIndicator.style.display = "block";
+          contentArea.style.display = "none";
+
+          // Show the modal shell immediately while loading
+          modal.show();
+
+          // Fetch updated content
+          fetch("/doctor-selection-content?_=" + new Date().getTime(), {
+            method: "GET",
+            headers: {
+              Accept: "text/html", // Expecting HTML fragment
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "Network response was not ok: " + response.statusText
+                );
+              }
+              return response.text();
+            })
+            .then((html) => {
+              // Replace the content area's innerHTML with the fetched fragment
+              contentArea.innerHTML = html;
+              // Hide loading and show content
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+              console.log("Modal content updated.");
+            })
+            .catch((error) => {
+              console.error("Error fetching or updating modal content:", error);
+              // Display an error message within the modal
+              contentArea.innerHTML =
+                '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách bác sĩ. Vui lòng thử lại sau.</div>';
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+            });
+        } else {
+          console.error("Doctor selection modal element not found");
+          alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+        }
+      };
+
+      // Thêm sự kiện nghe cho nút trò chuyện với bác sĩ
+      document.addEventListener("DOMContentLoaded", function () {
+        const chatButton = document.querySelector("#chat-doctor-navbar-btn");
+        if (chatButton) {
+          chatButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            console.log("Opening doctor modal from navbar button");
+            if (typeof openDoctorModal === "function") {
+              openDoctorModal();
+            } else {
+              console.error("openDoctorModal function not found");
+              alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+            }
+          });
+        }
+      });
+    </script>
+
+    <script th:inline="javascript">
+      // Lấy user ID từ model
+      const currentUserId = /*[[${loggedInUser.userId}]]*/ null;
+      const chatMessages = document.getElementById("chatMessages");
+      const messageInput = document.getElementById("chatInput");
+      let chatHistory = [];
+      const welcomeMessage =
+        /*[[${welcomeMessage}]]*/ "Xin chào! Tôi là chatbot tâm lý, tôi có thể giúp gì cho bạn hôm nay?";
+      const notificationSound = document.getElementById("notificationSound");
+      let userHasInteracted = false;
+
+      // Tải lịch sử chat từ local storage khi trang tải
+      document.addEventListener("DOMContentLoaded", function () {
+        loadChatHistory();
+
+        // Xử lý gửi tin nhắn
+        document
+          .getElementById("chatForm")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+            // Đánh dấu đã tương tác khi gửi tin nhắn
+            if (!userHasInteracted) {
+              preloadNotificationSound();
+            }
+            sendMessage();
+          });
+
+        // Thêm listener để preload âm thanh khi click lần đầu bất kỳ đâu
+        // nếu chưa tương tác qua việc gửi tin nhắn
+        document.body.addEventListener("click", handleFirstInteraction, {
+          once: true,
+        });
+      });
+
+      // Xử lý tương tác đầu tiên của người dùng (click)
+      function handleFirstInteraction() {
+        if (!userHasInteracted) {
+          console.log("User interacted with the page (click).");
+          preloadNotificationSound();
+        }
+        // Gỡ bỏ listener sau khi đã xử lý
+        document.body.removeEventListener("click", handleFirstInteraction);
+      }
+
+      // Preload âm thanh để vượt qua hạn chế trình duyệt
+      function preloadNotificationSound() {
+        if (userHasInteracted) return; // Chỉ preload một lần
+        console.log("Preloading notification sound...");
+        userHasInteracted = true;
+        if (notificationSound) {
+          notificationSound.volume = 0; // Tắt tiếng khi preload
+          const playPromise = notificationSound.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then((_) => {
+                notificationSound.pause();
+                notificationSound.currentTime = 0;
+                notificationSound.volume = 1; // Đặt lại âm lượng
+                console.log("Notification sound preloaded successfully.");
+              })
+              .catch((error) => {
+                console.error("Error preloading notification sound:", error);
+                // Có thể thử lại hoặc thông báo lỗi nếu cần
+              });
+          }
+        } else {
+          console.error("Notification sound element not found!");
+        }
+      }
+
+      // Tải lịch sử chat từ localStorage
+      function loadChatHistory() {
+        const storedChat = localStorage.getItem("chatbotHistory");
+        if (storedChat) {
+          chatHistory = JSON.parse(storedChat);
+
+          // Xóa tất cả tin nhắn hiện tại
+          while (chatMessages.firstChild) {
+            chatMessages.removeChild(chatMessages.firstChild);
+          }
+
+          // Hiển thị lịch sử chat
+          chatHistory.forEach((msg) => displayMessage(msg));
+
+          // Cuộn xuống dưới
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        } else {
+          // Nếu không có lịch sử, lưu tin nhắn chào mừng đầu tiên
+          const initialMessage = {
+            messageContent: welcomeMessage,
+            fromUser: false,
+            sentAt: new Date(),
+          };
+
+          saveMessageToHistory(initialMessage);
+        }
+      }
+
+      // Lưu tin nhắn mới vào lịch sử
+      function saveMessageToHistory(message) {
+        chatHistory.push(message);
+        localStorage.setItem("chatbotHistory", JSON.stringify(chatHistory));
+      }
+
+      // Xóa lịch sử chat
+      function clearChat() {
+        // Xóa localStorage
+        localStorage.removeItem("chatbotHistory");
+        chatHistory = [];
+
+        // Xóa tin nhắn trên giao diện
+        while (chatMessages.firstChild) {
+          chatMessages.removeChild(chatMessages.firstChild);
+        }
+
+        // Hiển thị tin nhắn chào mừng mới
+        const welcomeMessage = {
+          messageContent:
+            /*[[${welcomeMessage}]]*/ "Xin chào! Tôi là chatbot tâm lý, tôi có thể giúp gì cho bạn hôm nay?",
+          fromUser: false,
+          sentAt: new Date(),
+        };
+
+        displayMessage(welcomeMessage);
+        saveMessageToHistory(welcomeMessage);
+      }
+
+      // Hiển thị tin nhắn trong giao diện
+      function displayMessage(msg) {
+        const messageContainer = document.createElement("div");
+        messageContainer.className =
+          "message-container " + (msg.fromUser ? "user" : "bot");
+
+        // Thêm ID duy nhất cho tin nhắn từ bot để cuộn đến đúng vị trí
+        if (!msg.fromUser) {
+          const botMsgId = "bot-msg-" + Date.now();
+          messageContainer.id = botMsgId;
+        }
+
+        const messageElement = document.createElement("div");
+        messageElement.className =
+          "message " + (msg.fromUser ? "user-message" : "bot-message");
+        messageElement.textContent = msg.messageContent;
+
+        const timeElement = document.createElement("div");
+        timeElement.className = "message-time";
+
+        try {
+          const msgDate = new Date(msg.sentAt);
+          const options = { hour: "2-digit", minute: "2-digit", hour12: false };
+          timeElement.textContent = msgDate.toLocaleTimeString(
+            "vi-VN",
+            options
+          );
+        } catch (e) {
+          console.error("Error formatting time", e);
+          timeElement.textContent = new Date().toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+        }
+
+        messageContainer.appendChild(messageElement);
+        messageContainer.appendChild(timeElement);
+
+        // Thêm tin nhắn vào khung chat
+        chatMessages.appendChild(messageContainer);
+
+        // Đợi một tick để đảm bảo DOM đã cập nhật
+        setTimeout(() => {
+          try {
+            // Nếu là tin nhắn từ người dùng, cuộn xuống cuối cùng
+            if (msg.fromUser) {
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else {
+              // Nếu là tin nhắn từ bot, cuộn đến vị trí của tin nhắn này trong khung chat
+              // thay vì dùng scrollIntoView() (để tránh cuộn cả trang)
+              const containerRect = chatMessages.getBoundingClientRect();
+              const messageRect = messageContainer.getBoundingClientRect();
+              const offsetTop =
+                messageRect.top - containerRect.top + chatMessages.scrollTop;
+
+              // Cuộn đến vị trí tin nhắn (chỉ trong khung chat)
+              chatMessages.scrollTop = Math.max(0, offsetTop - 10); // Trừ 10px để có khoảng cách đẹp hơn
+            }
+          } catch (error) {
+            console.error("Lỗi khi cuộn:", error);
+            // Fallback nếu có lỗi: luôn cuộn xuống dưới
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+        }, 0);
+      }
+
+      // Hiển thị chỉ báo đang nhập
+      function showTypingIndicator() {
+        const typingContainer = document.createElement("div");
+        typingContainer.className = "message-container bot";
+        typingContainer.id = "typingIndicator";
+
+        const typingElement = document.createElement("div");
+        typingElement.className = "typing-indicator";
+        typingElement.innerHTML = "<span></span><span></span><span></span>";
+
+        typingContainer.appendChild(typingElement);
+        chatMessages.appendChild(typingContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // Xóa chỉ báo đang nhập
+      function removeTypingIndicator() {
+        const typingIndicator = document.getElementById("typingIndicator");
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+
+      // Gửi tin nhắn
+      function sendMessage() {
+        const messageContent = messageInput.value.trim();
+
+        if (!messageContent) {
+          return;
+        }
+
+        // Tạo đối tượng tin nhắn
+        const userMessage = {
+          senderId: currentUserId,
+          messageContent: messageContent,
+          sentAt: new Date(),
+          fromUser: true,
+          clientId: "msg_" + new Date().getTime(),
+        };
+
+        // Hiển thị tin nhắn của người dùng
+        displayMessage(userMessage);
+
+        // Lưu tin nhắn vào localStorage
+        saveMessageToHistory(userMessage);
+
+        // Xóa nội dung input
+        messageInput.value = "";
+
+        // Hiển thị chỉ báo đang nhập
+        showTypingIndicator();
+
+        // Gửi tin nhắn đến server
+        fetch("/api/chatbot/message", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userMessage),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            // Thời gian hiển thị đang gõ dựa vào độ dài tin nhắn
+            const typingDelay = Math.min(data.response.length * 10, 2000);
+            // Ít nhất 1,5 giây để người dùng nhận ra bot đang gõ
+            const minDelay = 1500;
+            const delay = Math.max(typingDelay, minDelay);
+
+            setTimeout(() => {
+              // Xóa chỉ báo đang nhập
+              removeTypingIndicator();
+
+              // Tạo tin nhắn phản hồi
+              const botMessage = {
+                senderId: 0, // Bot ID
+                messageContent: data.response,
+                sentAt: new Date(),
+                fromUser: false,
+              };
+
+              // Hiển thị tin nhắn từ bot
+              displayMessage(botMessage);
+
+              // Phát âm thanh nếu người dùng đã tương tác
+              if (userHasInteracted && notificationSound) {
+                console.log("Playing notification sound...");
+                notificationSound.currentTime = 0; // Reset audio to start
+                notificationSound
+                  .play()
+                  .catch((e) => console.error("Error playing sound:", e));
+              }
+
+              // Lưu tin nhắn vào localStorage
+              saveMessageToHistory(botMessage);
+            }, delay);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+
+            // Xóa chỉ báo đang nhập
+            removeTypingIndicator();
+
+            // Hiển thị thông báo lỗi
+            const errorMessage = {
+              senderId: 0,
+              messageContent: "Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại sau.",
+              sentAt: new Date(),
+              fromUser: false,
+            };
+
+            displayMessage(errorMessage);
+            saveMessageToHistory(errorMessage);
+          });
+      }
+    </script>
+  </body>
+</html>

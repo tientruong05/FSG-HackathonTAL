@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:class="${loggedInUser != null && loggedInUser.role.roleName == 'user'} ? 'therapy-mode' : ''"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack GPT - Thông tin cá nhân</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Thêm therapy theme fragment -->
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+    <!-- Custom CSS -->
+    <style>
+      :root {
+        --primary-color: #4a8f7b;
+        --secondary-color: #e6e6e6;
+        --text-color: #333;
+        --light-color: #fff;
+        --dark-color: #212529;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+      }
+
+      .hero-section {
+        background: linear-gradient(135deg, #4a8f7b 0%, #36735e 100%);
+        color: var(--light-color);
+        text-align: center;
+        padding: 70px 0;
+        position: relative;
+      }
+
+      .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+
+      .profile-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+
+      .profile-card {
+        background-color: var(--light-color);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .profile-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 20px;
+        border: 4px solid var(--primary-color);
+      }
+
+      .profile-title {
+        color: var(--primary-color);
+        margin-bottom: 8px;
+      }
+
+      .form-control {
+        border-radius: 10px;
+        border: 1px solid var(--secondary-color);
+        padding: 12px;
+        margin-bottom: 15px;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(74, 143, 123, 0.25);
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: #555;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background-color: #3a7a68;
+      }
+
+      .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: var(--light-color);
+      }
+    </style>
+    <link th:href="@{/css/style2.css}" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Include Navbar Fragment -->
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <!-- Thêm doctors-modal vào đây -->
+    <th:block
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></th:block>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container hero-content">
+        <h1 class="hero-title">Thông tin cá nhân</h1>
+      </div>
+    </section>
+
+    <!-- Profile Content -->
+    <div class="profile-container">
+      <div
+        th:if="${errorMessage}"
+        class="alert alert-danger"
+        role="alert"
+        th:text="${errorMessage}"
+      ></div>
+      <div
+        th:if="${successMessage}"
+        class="alert alert-success"
+        role="alert"
+        th:text="${successMessage}"
+      ></div>
+      <div
+        th:if="${passwordError}"
+        class="alert alert-danger"
+        role="alert"
+        th:text="${passwordError}"
+      ></div>
+
+      <!-- Unified Profile Card -->
+      <div class="profile-card">
+        <h3 class="profile-title">Thông tin cá nhân</h3>
+        <div class="profile-header">
+          <img
+            th:src="${loggedInUser.image}"
+            alt="Profile Image"
+            class="profile-image"
+          />
+          <div>
+            <h4 th:text="${loggedInUser.fullName}"></h4>
+            <p class="text-muted" th:text="${loggedInUser.email}"></p>
+          </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="details-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#details"
+              type="button"
+              role="tab"
+              aria-controls="details"
+              aria-selected="true"
+            >
+              Thông tin chi tiết
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="password-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#password"
+              type="button"
+              role="tab"
+              aria-controls="password"
+              aria-selected="false"
+            >
+              Đổi mật khẩu
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="profileTabsContent">
+          <!-- Thông tin chi tiết tab -->
+          <div
+            class="tab-pane fade show active"
+            id="details"
+            role="tabpanel"
+            aria-labelledby="details-tab"
+          >
+            <form
+              th:action="@{/user/update-profile}"
+              method="post"
+              enctype="multipart/form-data"
+              class="needs-validation"
+              novalidate
+            >
+              <div class="mb-3">
+                <label for="profileImage" class="form-label"
+                  >Ảnh đại diện mới</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="profileImage"
+                  name="image"
+                  accept="image/*"
+                />
+                <small class="form-text text-muted"
+                  >Để trống nếu không muốn thay đổi ảnh.</small
+                >
+              </div>
+
+              <div class="mb-3">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  th:value="${loggedInUser.email}"
+                  readonly
+                  disabled
+                  hidden
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="fullName" class="form-label"
+                  >Họ tên <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="fullName"
+                  name="fullName"
+                  th:value="${loggedInUser.fullName}"
+                  required
+                />
+                <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="phone" class="form-label">Số điện thoại</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="phone"
+                  name="phone"
+                  th:value="${loggedInUser.phone}"
+                  pattern="^[0-9]{10,11}$"
+                />
+                <div class="invalid-feedback">
+                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Cập nhật thông tin
+              </button>
+            </form>
+          </div>
+
+          <!-- Đổi mật khẩu tab -->
+          <div
+            class="tab-pane fade"
+            id="password"
+            role="tabpanel"
+            aria-labelledby="password-tab"
+          >
+            <form
+              th:action="@{/user/update-password}"
+              method="post"
+              class="needs-validation"
+              novalidate
+            >
+              <div class="mb-3">
+                <label for="currentPassword" class="form-label"
+                  >Mật khẩu hiện tại <span class="text-danger">*</span></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="currentPassword"
+                  name="currentPassword"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Vui lòng nhập mật khẩu hiện tại
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="newPassword" class="form-label"
+                  >Mật khẩu mới <span class="text-danger">*</span></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="newPassword"
+                  name="newPassword"
+                  required
+                  minlength="8"
+                  pattern="^[^\s]+$"
+                />
+                <div class="invalid-feedback">
+                  Mật khẩu phải có ít nhất 8 ký tự và không chứa khoảng trắng
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label"
+                  >Xác nhận mật khẩu mới
+                  <span class="text-danger">*</span></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Vui lòng xác nhận mật khẩu mới
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Đổi mật khẩu
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <th:block th:replace="~{fragments/back-to-top :: backToTop}"></th:block>
+
+    <!-- Include Footer Fragment -->
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script for openDoctorModal -->
+    <script>
+      window.openDoctorModal = function () {
+        console.log("Opening doctor modal with global function");
+        const modalElement = document.getElementById("doctorSelectionModal");
+        if (modalElement) {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+          const loadingIndicator =
+            document.getElementById("doctorModalLoading");
+          const contentArea = document.getElementById("doctorModalBodyContent");
+
+          if (!loadingIndicator || !contentArea) {
+            console.error("Modal loading or content area not found!");
+            return;
+          }
+
+          // Show loading indicator and hide content
+          loadingIndicator.style.display = "block";
+          contentArea.style.display = "none";
+
+          // Show the modal shell immediately while loading
+          modal.show();
+
+          // Fetch updated content
+          fetch("/doctor-selection-content?_=" + new Date().getTime(), {
+            method: "GET",
+            headers: {
+              Accept: "text/html", // Expecting HTML fragment
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "Network response was not ok: " + response.statusText
+                );
+              }
+              return response.text();
+            })
+            .then((html) => {
+              // Replace the content area's innerHTML with the fetched fragment
+              contentArea.innerHTML = html;
+              // Hide loading and show content
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+              console.log("Modal content updated.");
+            })
+            .catch((error) => {
+              console.error("Error fetching or updating modal content:", error);
+              // Display an error message within the modal
+              contentArea.innerHTML =
+                '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách bác sĩ. Vui lòng thử lại sau.</div>';
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+            });
+        } else {
+          console.error("Doctor selection modal element not found");
+          alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+        }
+      };
+
+      // Lắng nghe nút "Chat với bác sĩ" trong navbar
+      document.addEventListener("DOMContentLoaded", function () {
+        const chatButton = document.querySelector("#chat-doctor-navbar-btn");
+        if (chatButton) {
+          chatButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            console.log("Opening doctor modal from navbar button");
+            if (typeof openDoctorModal === "function") {
+              openDoctorModal();
+            } else {
+              console.error("openDoctorModal function not found");
+              alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+            }
+          });
+        }
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Tự động ẩn thông báo sau 5 giây
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            alert.style.transition = "opacity 0.5s ease";
+            alert.style.opacity = "0";
+            setTimeout(() => alert.remove(), 500);
+          }, 5000);
+        });
+
+        // Bootstrap form validation
+        var forms = document.querySelectorAll(".needs-validation");
+        Array.prototype.slice.call(forms).forEach(function (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        });
+
+        // Client-side password confirmation validation
+        document
+          .getElementById("newPassword")
+          .addEventListener("input", validatePassword);
+        document
+          .getElementById("confirmPassword")
+          .addEventListener("input", validatePassword);
+
+        function validatePassword() {
+          const newPassword = document.getElementById("newPassword").value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+          const confirmInput = document.getElementById("confirmPassword");
+
+          if (newPassword !== confirmPassword) {
+            confirmInput.setCustomValidity("Mật khẩu xác nhận không khớp");
+          } else {
+            confirmInput.setCustomValidity("");
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

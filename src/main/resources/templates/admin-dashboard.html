@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack GPT - Bảng điều khiển Admin</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Custom CSS -->
+    <style>
+      :root {
+        --primary-color: #4a8f7b;
+        --secondary-color: #e6e6e6;
+        --text-color: #333;
+        --light-color: #fff;
+        --dark-color: #212529;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+      }
+
+      .hero-section {
+        background: linear-gradient(135deg, #4a8f7b 0%, #36735e 100%);
+        color: var(--light-color);
+        text-align: center;
+        padding: 70px 0;
+        position: relative;
+      }
+
+      .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+
+      .dashboard-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+
+      .tab-content {
+        padding: 20px;
+        background-color: var(--light-color);
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-tabs .nav-link {
+        color: var(--text-color);
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        margin-right: 5px;
+        transition: all 0.3s ease;
+      }
+
+      .nav-tabs .nav-link.active {
+        background-color: var(--primary-color);
+        color: var(--light-color);
+      }
+
+      .nav-tabs .nav-link:hover {
+        background-color: rgba(74, 143, 123, 0.1);
+        color: var(--primary-color);
+      }
+
+      .form-control {
+        border-radius: 10px;
+        border: 1px solid var(--secondary-color);
+        padding: 10px;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background-color: #3a7a68;
+      }
+
+      .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+
+      .table {
+        background-color: var(--light-color);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .table th,
+      .table td {
+        vertical-align: middle;
+      }
+
+      .current-image {
+        max-width: 100px;
+        margin-bottom: 10px;
+      }
+
+      /* Pagination Styles */
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin: 40px 0;
+      }
+
+      .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .pagination .page-item {
+        background-color: #fff;
+      }
+
+      .pagination .page-link {
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        padding: 0 10px;
+      }
+
+      .pagination .page-item.active .page-link {
+        background-color: var(--primary-color);
+        color: var(--light-color);
+        font-weight: 600;
+      }
+
+      .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+        background-color: #f0f8f6;
+        color: var(--primary-color);
+      }
+
+      .pagination .page-item.disabled .page-link {
+        color: #ccc;
+        pointer-events: none;
+        background-color: #f8f9fa;
+      }
+
+      .pagination .page-item:first-child .page-link,
+      .pagination .page-item:last-child .page-link {
+        font-weight: 500;
+        padding: 0 15px;
+      }
+
+      .pagination-info {
+        text-align: center;
+        margin-top: 10px;
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      /* Modal Styles */
+      .modal-lg {
+        max-width: 800px;
+      }
+
+      .modal-xl {
+        max-width: 1140px;
+      }
+
+      .article-modal .modal-body {
+        padding: 20px 30px;
+      }
+
+      .article-modal .tox-tinymce {
+        min-height: 400px !important;
+      }
+    </style>
+
+    <link th:href="@{/css/style2.css}" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Include Navbar Fragment -->
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container hero-content">
+        <h1 class="hero-title">Bảng điều khiển Admin</h1>
+      </div>
+    </section>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+      <div
+        th:if="${errorMessage}"
+        class="alert alert-danger"
+        role="alert"
+        th:text="${errorMessage}"
+      ></div>
+      <div
+        th:if="${successMessage}"
+        class="alert alert-success"
+        role="alert"
+        th:text="${successMessage}"
+      ></div>
+      <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a
+            class="nav-link"
+            th:classappend="${currentTab == 'doctors'} ? 'active' : ''"
+            id="doctors-tab"
+            data-bs-toggle="tab"
+            href="#doctors"
+            role="tab"
+            aria-controls="doctors"
+            aria-selected="${currentTab == 'doctors'}"
+            >Quản lý Bác sĩ</a
+          >
+        </li>
+        <li class="nav-item" role="presentation">
+          <a
+            class="nav-link"
+            th:classappend="${currentTab == 'users'} ? 'active' : ''"
+            id="users-tab"
+            data-bs-toggle="tab"
+            href="#users"
+            role="tab"
+            aria-controls="users"
+            aria-selected="${currentTab == 'users'}"
+            >Quản lý Người dùng</a
+          >
+        </li>
+        <li class="nav-item" role="presentation">
+          <a
+            class="nav-link"
+            th:classappend="${currentTab == 'articles'} ? 'active' : ''"
+            id="articles-tab"
+            data-bs-toggle="tab"
+            href="#articles"
+            role="tab"
+            aria-controls="articles"
+            aria-selected="${currentTab == 'articles'}"
+            >Quản lý Bài viết</a
+          >
+        </li>
+      </ul>
+
+      <div class="tab-content" id="adminTabContent">
+        <!-- Articles Tab -->
+        <div
+          class="tab-pane fade"
+          th:classappend="${currentTab == 'articles'} ? 'show active' : ''"
+          id="articles"
+          role="tabpanel"
+          aria-labelledby="articles-tab"
+        >
+          <h3>Quản lý Bài viết</h3>
+          <div
+            class="alert alert-danger"
+            role="alert"
+            th:if="${articleError != null}"
+            th:text="${articleError}"
+          ></div>
+          <button
+            class="btn btn-primary mb-3"
+            data-bs-toggle="modal"
+            data-bs-target="#addArticleModal"
+          >
+            Thêm Bài viết
+          </button>
+          <table
+            class="table table-striped"
+            th:if="${articles != null and !articles.isEmpty()}"
+          >
+            <thead>
+              <tr>
+                <th width="5%">STT</th>
+                <th>Tiêu đề</th>
+                <th>Hình ảnh</th>
+                <th>Lượt xem</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="article, status : ${articles}">
+                <td th:text="${articlePage.number * articlePage.size + status.count}"></td>
+                <td th:text="${article.title}"></td>
+                <td>
+                  <img
+                    th:src="${article.image}"
+                    alt="Article Image"
+                    style="max-width: 100px"
+                  />
+                </td>
+                <td th:text="${article.views}"></td>
+                <td>
+                  <button
+                    class="btn btn-primary btn-sm me-2 edit-article"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editArticleModal"
+                    th:attr="data-id=${article.articleId}, 
+                             data-title=${article.title}, 
+                             data-image=${article.image}, 
+                             data-content=${article.content}"
+                  >
+                    Sửa
+                  </button>
+                  <form
+                    th:action="@{/admin/articles/delete/{id}(id=${article.articleId})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-danger btn-sm"
+                      onclick="return confirm('Bạn có chắc muốn xóa?')"
+                    >
+                      Xóa
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div
+            class="text-center my-5"
+            th:if="${articles == null or articles.isEmpty()}"
+          >
+            <h4>Không có bài viết nào.</h4>
+            <p>Hãy thêm bài viết mới.</p>
+          </div>
+          <div
+            class="pagination-container"
+            th:if="${articlePage != null and articlePage.totalPages > 0}"
+          >
+            <ul class="pagination">
+              <li
+                class="page-item"
+                th:classappend="${articlePage.first} ? 'disabled'"
+              >
+                <a
+                  class="page-link"
+                  th:href="@{/admin/dashboard(page=${articlePage.number - 1}, size=${articlePage.size}, tab='articles')}"
+                >
+                  <i class="bi bi-chevron-left"></i> Trước
+                </a>
+              </li>
+              <th:block
+                th:each="pageNumber : ${#numbers.sequence(T(java.lang.Math).max(0, articlePage.number - 2), T(java.lang.Math).min(articlePage.totalPages - 1, articlePage.number + 2))}"
+              >
+                <li
+                  class="page-item"
+                  th:classappend="${pageNumber == articlePage.number} ? 'active'"
+                >
+                  <a
+                    class="page-link"
+                    th:text="${pageNumber + 1}"
+                    th:href="@{/admin/dashboard(page=${pageNumber}, size=${articlePage.size}, tab='articles')}"
+                  ></a>
+                </li>
+              </th:block>
+              <li
+                class="page-item disabled"
+                th:if="${articlePage.number + 3 < articlePage.totalPages - 1}"
+              >
+                <span class="page-link">...</span>
+              </li>
+              <li
+                class="page-item"
+                th:classappend="${articlePage.number == articlePage.totalPages - 1} ? 'active'"
+                th:if="${articlePage.totalPages > 1 and articlePage.number + 3 < articlePage.totalPages}"
+              >
+                <a
+                  class="page-link"
+                  th:text="${articlePage.totalPages}"
+                  th:href="@{/admin/dashboard(page=${articlePage.totalPages - 1}, size=${articlePage.size}, tab='articles')}"
+                ></a>
+              </li>
+              <li
+                class="page-item"
+                th:classappend="${articlePage.last} ? 'disabled'"
+              >
+                <a
+                  class="page-link"
+                  th:href="@{/admin/dashboard(page=${articlePage.number + 1}, size=${articlePage.size}, tab='articles')}"
+                >
+                  Sau <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div
+            class="pagination-info"
+            th:if="${articlePage != null and articlePage.totalElements > 0}"
+          >
+            Hiển thị <span th:text="${articlePage.numberOfElements}"></span> /
+            <span th:text="${articlePage.totalElements}"></span> bài viết
+          </div>
+        </div>
+
+        <!-- Doctors Tab -->
+        <div
+          class="tab-pane fade"
+          th:classappend="${currentTab == 'doctors'} ? 'show active' : ''"
+          id="doctors"
+          role="tabpanel"
+          aria-labelledby="doctors-tab"
+        >
+          <h3>Quản lý Bác sĩ</h3>
+          <div
+            class="alert alert-danger"
+            role="alert"
+            th:if="${doctorError != null}"
+            th:text="${doctorError}"
+          ></div>
+          <button
+            class="btn btn-primary mb-3"
+            data-bs-toggle="modal"
+            data-bs-target="#addDoctorModal"
+          >
+            Thêm Bác sĩ
+          </button>
+          <table
+            class="table table-striped"
+            th:if="${doctors != null and !doctors.isEmpty()}"
+          >
+            <thead>
+              <tr>
+                <th width="5%">STT</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Ảnh</th>
+                <th>Trạng thái</th>
+                <th>Hoạt động</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="doctor, status : ${doctors}">
+                <td th:text="${doctorPage.number * doctorPage.size + status.count}"></td>
+                <td th:text="${doctor.fullName}"></td>
+                <td th:text="${doctor.email}"></td>
+                <td th:text="${doctor.phone}"></td>
+                <td>
+                  <img
+                    th:src="${doctor.image}"
+                    alt="Doctor Image"
+                    style="max-width: 100px"
+                  />
+                </td>
+                <td>
+                  <span
+                    th:class="'badge ' + (${doctor.isOnline} ? 'bg-success' : 'bg-danger')"
+                    th:text="${doctor.isOnline} ? 'Online' : 'Offline'"
+                  ></span>
+                </td>
+                <td>
+                  <span
+                    th:class="'badge ' + (${doctor.isActive} ? 'bg-success' : 'bg-warning')"
+                    th:text="${doctor.isActive} ? 'Hoạt động' : 'Đã khóa'"
+                  ></span>
+                </td>
+                <td>
+                  <button
+                    class="btn btn-primary btn-sm me-2 edit-doctor"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editDoctorModal"
+                    th:attr="data-id=${doctor.userId}, 
+                             data-name=${doctor.fullName}, 
+                             data-email=${doctor.email}, 
+                             data-phone=${doctor.phone}, 
+                             data-image=${doctor.image}, 
+                             data-isOnline=${doctor.isOnline}, 
+                             data-isActive=${doctor.isActive}"
+                  >
+                    Sửa
+                  </button>
+                  <form
+                    th:action="@{/admin/doctors/delete/{userId}(userId=${doctor.userId})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-danger btn-sm"
+                      onclick="return confirm('Bạn có chắc muốn xóa?')"
+                    >
+                      Xóa
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div
+            class="text-center my-5"
+            th:if="${doctors == null or doctors.isEmpty()}"
+          >
+            <h4>Không có bác sĩ nào.</h4>
+            <p>Hãy thêm bác sĩ mới.</p>
+          </div>
+          <div
+            class="pagination-container"
+            th:if="${doctorPage != null and doctorPage.totalPages > 0}"
+          >
+            <ul class="pagination">
+              <li
+                class="page-item"
+                th:classappend="${doctorPage.first} ? 'disabled'"
+              >
+                <a
+                  class="page-link"
+                  th:href="@{/admin/dashboard(page=${doctorPage.number - 1}, size=${doctorPage.size}, tab='doctors')}"
+                >
+                  <i class="bi bi-chevron-left"></i> Trước
+                </a>
+              </li>
+              <th:block
+                th:each="pageNumber : ${#numbers.sequence(T(java.lang.Math).max(0, doctorPage.number - 2), T(java.lang.Math).min(doctorPage.totalPages - 1, doctorPage.number + 2))}"
+              >
+                <li
+                  class="page-item"
+                  th:classappend="${pageNumber == doctorPage.number} ? 'active'"
+                >
+                  <a
+                    class="page-link"
+                    th:text="${pageNumber + 1}"
+                    th:href="@{/admin/dashboard(page=${pageNumber}, size=${doctorPage.size}, tab='doctors')}"
+                  ></a>
+                </li>
+              </th:block>
+              <li
+                class="page-item disabled"
+                th:if="${doctorPage.number + 3 < doctorPage.totalPages - 1}"
+              >
+                <span class="page-link">...</span>
+              </li>
+              <li
+                class="page-item"
+                th:classappend="${doctorPage.number == doctorPage.totalPages - 1} ? 'active'"
+                th:if="${doctorPage.totalPages > 1 and doctorPage.number + 3 < doctorPage.totalPages}"
+              >
+                <a
+                  class="page-link"
+                  th:text="${doctorPage.totalPages}"
+                  th:href="@{/admin/dashboard(page=${doctorPage.totalPages - 1}, size=${doctorPage.size}, tab='doctors')}"
+                ></a>
+              </li>
+              <li
+                class="page-item"
+                th:classappend="${doctorPage.last} ? 'disabled'"
+              >
+                <a
+                  class="page-link"
+                  th:href="@{/admin/dashboard(page=${doctorPage.number + 1}, size=${doctorPage.size}, tab='doctors')}"
+                >
+                  Sau <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div
+            class="pagination-info"
+            th:if="${doctorPage != null and doctorPage.totalElements > 0}"
+          >
+            Hiển thị <span th:text="${doctorPage.numberOfElements}"></span> /
+            <span th:text="${doctorPage.totalElements}"></span> bác sĩ
+          </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div
+          class="tab-pane fade"
+          th:classappend="${currentTab == 'users'} ? 'show active' : ''"
+          id="users"
+          role="tabpanel"
+          aria-labelledby="users-tab"
+        >
+          <h3>Quản lý Người dùng</h3>
+          <div
+            class="alert alert-danger"
+            role="alert"
+            th:if="${userError != null}"
+            th:text="${userError}"
+          ></div>
+          <button
+            class="btn btn-primary mb-3"
+            data-bs-toggle="modal"
+            data-bs-target="#addUserModal"
+          >
+            Thêm Người dùng
+          </button>
+          <table
+            class="table table-striped"
+            th:if="${users != null and !users.isEmpty()}"
+          >
+            <thead>
+              <tr>
+                <th width="5%">STT</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Ảnh</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="user, status : ${users}">
+                <td th:text="${userPage.number * userPage.size + status.count}"></td>
+                <td th:text="${user.fullName}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${user.phone}"></td>
+                <td>
+                  <img
+                    th:src="${user.image}"
+                    alt="User Image"
+                    style="max-width: 100px"
+                  />
+                </td>
+                <td>
+                  <button
+                    class="btn btn-primary btn-sm me-2 edit-user"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editUserModal"
+                    th:attr="data-id=${user.userId}, 
+                             data-name=${user.fullName}, 
+                             data-email=${user.email}, 
+                             data-phone=${user.phone}, 
+                             data-image=${user.image}, 
+                             data-isOnline=${user.isOnline}, 
+                             data-isActive=${user.isActive}"
+                  >
+                    Sửa
+                  </button>
+                  <form
+                    th:action="@{/admin/users/delete/{userId}(userId=${user.userId})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-danger btn-sm"
+                      onclick="return confirm('Bạn có chắc muốn xóa?')"
+                    >
+                      Xóa
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div
+            class="text-center my-5"
+            th:if="${users == null or users.isEmpty()}"
+          >
+            <h4>Không có người dùng nào.</h4>
+            <p>Hãy thêm người dùng mới.</p>
+          </div>
+          <div
+            class="pagination-container"
+            th:if="${userPage != null and userPage.totalPages > 0}"
+          >
+            <ul class="pagination">
+              <li
+                class="page-item"
+                th:classappend="${userPage.first} ? 'disabled'"
+              >
+                <a
+                  class="page-link"
+                  th:href="@{/admin/dashboard(page=${userPage.number - 1}, size=${userPage.size}, tab='users')}"
+                >
+                  <i class="bi bi-chevron-left"></i> Trước
+                </a>
+              </li>
+              <th:block
+                th:each="pageNumber : ${#numbers.sequence(T(java.lang.Math).max(0, userPage.number - 2), T(java.lang.Math).min(userPage.totalPages - 1, userPage.number + 2))}"
+              >
+                <li
+                  class="page-item"
+                  th:classappend="${pageNumber == userPage.number} ? 'active'"
+                >
+                  <a
+                    class="page-link"
+                    th:text="${pageNumber + 1}"
+                    th:href="@{/admin/dashboard(page=${pageNumber}, size=${userPage.size}, tab='users')}"
+                  ></a>
+                </li>
+              </th:block>
+              <li
+                class="page-item disabled"
+                th:if="${userPage.number + 3 < userPage.totalPages - 1}"
+              >
+                <span class="page-link">...</span>
+              </li>
+              <li
+                class="page-item"
+                th:classappend="${userPage.number == userPage.totalPages - 1} ? 'active'"
+                th:if="${userPage.totalPages > 1 and userPage.number + 3 < userPage.totalPages}"
+              >
+                <a
+                  class="page-link"
+                  th:text="${userPage.totalPages}"
+                  th:href="@{/admin/dashboard(page=${userPage.totalPages - 1}, size=${userPage.size}, tab='users')}"
+                ></a>
+              </li>
+              <li
+                class="page-item"
+                th:classappend="${userPage.last} ? 'disabled'"
+              >
+                <a
+                  class="page-link"
+                  th:href="@{/admin/dashboard(page=${userPage.number + 1}, size=${userPage.size}, tab='users')}"
+                >
+                  Sau <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div
+            class="pagination-info"
+            th:if="${userPage != null and userPage.totalElements > 0}"
+          >
+            Hiển thị <span th:text="${userPage.numberOfElements}"></span> /
+            <span th:text="${userPage.totalElements}"></span> người dùng
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Article Modal -->
+    <div
+      class="modal fade article-modal"
+      id="addArticleModal"
+      tabindex="-1"
+      aria-labelledby="addArticleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addArticleModalLabel">Thêm Bài viết</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              th:action="@{/admin/articles/add}"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-3">
+                <label for="articleTitle" class="form-label">Tiêu đề</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="articleTitle"
+                  name="title"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="articleImage" class="form-label">Hình ảnh</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="articleImage"
+                  name="image"
+                  accept="image/*"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="articleContent" class="form-label">Nội dung</label>
+                <textarea
+                  class="form-control"
+                  id="articleContent"
+                  name="content"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Thêm</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Article Modal -->
+    <div
+      class="modal fade article-modal"
+      id="editArticleModal"
+      tabindex="-1"
+      aria-labelledby="editArticleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editArticleModalLabel">Sửa Bài viết</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              th:action="@{/admin/articles/update}"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              <input type="hidden" id="editArticleId" name="articleId" />
+              <div class="mb-3">
+                <label for="editArticleTitle" class="form-label">Tiêu đề</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editArticleTitle"
+                  name="title"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editArticleImage" class="form-label"
+                  >Hình ảnh mới</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="editArticleImage"
+                  name="image-update"
+                  accept="image/*"
+                />
+                <small class="form-text text-muted"
+                  >Để trống nếu không muốn thay đổi hình ảnh.</small
+                >
+                <div class="mt-2">
+                  <label class="form-label">Hình ảnh hiện tại</label>
+                  <img
+                    id="currentArticleImage"
+                    class="current-image"
+                    src=""
+                    alt="Current Image"
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="editArticleContent" class="form-label"
+                  >Nội dung</label
+                >
+                <textarea
+                  class="form-control"
+                  id="editArticleContent"
+                  name="content"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Cập nhật</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Doctor Modal -->
+    <div
+      class="modal fade"
+      id="addDoctorModal"
+      tabindex="-1"
+      aria-labelledby="addDoctorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addDoctorModalLabel">Thêm Bác sĩ</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              th:action="@{/admin/doctors/add}"
+              method="post"
+              enctype="multipart/form-data"
+              class="needs-validation"
+              novalidate
+            >
+              <div class="mb-3">
+                <label for="doctorFullName" class="form-label"
+                  >Họ tên <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="doctorFullName"
+                  name="fullName"
+                  required
+                />
+                <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+              </div>
+              <div class="mb-3">
+                <label for="doctorEmail" class="form-label"
+                  >Email <span class="text-danger">*</span></label
+                >
+                <input
+                  type="email"
+                  class="form-control"
+                  id="doctorEmail"
+                  name="email"
+                  required
+                  pattern="^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"
+                />
+                <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+              </div>
+              <div class="mb-3">
+                <label for="doctorPassword" class="form-label"
+                  >Mật khẩu <span class="text-danger">*</span></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="doctorPassword"
+                  name="password"
+                  required
+                  minlength="8"
+                  pattern="^[^\s]+$"
+                />
+                <div class="invalid-feedback">
+                  Mật khẩu phải có ít nhất 8 ký tự và không chứa khoảng trắng
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="doctorPhone" class="form-label"
+                  >Số điện thoại</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="doctorPhone"
+                  name="phone"
+                  pattern="^[0-9]{10,11}$"
+                />
+                <div class="invalid-feedback">
+                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="doctorImage" class="form-label">Ảnh đại diện</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="doctorImage"
+                  name="image"
+                  accept="image/*"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="doctorIsOnline" class="form-label"
+                  >Trạng thái</label
+                >
+                <select
+                  class="form-control"
+                  id="doctorIsOnline"
+                  name="isOnline"
+                >
+                  <option value="true">Online</option>
+                  <option value="false" selected>Offline</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="doctorIsActive" class="form-label">Hoạt động</label>
+                <select
+                  class="form-control"
+                  id="doctorIsActive"
+                  name="isActive"
+                >
+                  <option value="true" selected>Hoạt động</option>
+                  <option value="false">Đã khóa</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Thêm</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Doctor Modal -->
+    <div
+      class="modal fade"
+      id="editDoctorModal"
+      tabindex="-1"
+      aria-labelledby="editDoctorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editDoctorModalLabel">Sửa Bác sĩ</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              th:action="@{/admin/doctors/update}"
+              method="post"
+              enctype="multipart/form-data"
+              class="needs-validation"
+              novalidate
+            >
+              <input type="hidden" id="editDoctorId" name="userId" />
+              <div class="mb-3">
+                <label for="editDoctorFullName" class="form-label"
+                  >Họ tên <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editDoctorFullName"
+                  name="fullName"
+                  required
+                />
+                <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+              </div>
+              <div class="mb-3">
+                <label for="editDoctorEmail" class="form-label"
+                  >Email <span class="text-danger">*</span></label
+                >
+                <input
+                  type="email"
+                  class="form-control"
+                  id="editDoctorEmail"
+                  name="email"
+                  required
+                  pattern="^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"
+                />
+                <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+              </div>
+              <div class="mb-3">
+                <label for="editDoctorPhone" class="form-label"
+                  >Số điện thoại</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editDoctorPhone"
+                  name="phone"
+                  pattern="^[0-9]{10,11}$"
+                />
+                <div class="invalid-feedback">
+                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="editDoctorImage" class="form-label"
+                  >Ảnh đại diện mới</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="editDoctorImage"
+                  name="image"
+                  accept="image/*"
+                />
+                <small class="form-text text-muted"
+                  >Để trống nếu không muốn thay đổi ảnh.</small
+                >
+                <div class="mt-2">
+                  <label class="form-label">Ảnh hiện tại</label>
+                  <img
+                    id="currentDoctorImage"
+                    class="current-image"
+                    src=""
+                    alt="Current Image"
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="editDoctorIsOnline" class="form-label"
+                  >Trạng thái</label
+                >
+                <select
+                  class="form-control"
+                  id="editDoctorIsOnline"
+                  name="isOnline"
+                >
+                  <option value="true">Online</option>
+                  <option value="false">Offline</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="editDoctorIsActive" class="form-label"
+                  >Hoạt động</label
+                >
+                <select
+                  class="form-control"
+                  id="editDoctorIsActive"
+                  name="isActive"
+                >
+                  <option value="true">Hoạt động</option>
+                  <option value="false">Đã khóa</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Cập nhật</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div
+      class="modal fade"
+      id="addUserModal"
+      tabindex="-1"
+      aria-labelledby="addUserModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addUserModalLabel">Thêm Người dùng</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              th:action="@{/admin/users/add}"
+              method="post"
+              enctype="multipart/form-data"
+              class="needs-validation"
+              novalidate
+            >
+              <div class="mb-3">
+                <label for="userFullName" class="form-label"
+                  >Họ tên <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="userFullName"
+                  name="fullName"
+                  required
+                />
+                <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+              </div>
+              <div class="mb-3">
+                <label for="userEmail" class="form-label"
+                  >Email <span class="text-danger">*</span></label
+                >
+                <input
+                  type="email"
+                  class="form-control"
+                  id="userEmail"
+                  name="email"
+                  required
+                  pattern="^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"
+                />
+                <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+              </div>
+              <div class="mb-3">
+                <label for="userPassword" class="form-label"
+                  >Mật khẩu <span class="text-danger">*</span></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="userPassword"
+                  name="password"
+                  required
+                  minlength="8"
+                  pattern="^[^\s]+$"
+                />
+                <div class="invalid-feedback">
+                  Mật khẩu phải có ít nhất 8 ký tự và không chứa khoảng trắng
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="userPhone" class="form-label">Số điện thoại</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="userPhone"
+                  name="phone"
+                  pattern="^[0-9]{10,11}$"
+                />
+                <div class="invalid-feedback">
+                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="userImage" class="form-label">Ảnh đại diện</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="userImage"
+                  name="image"
+                  accept="image/*"
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Thêm</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div
+      class="modal fade"
+      id="editUserModal"
+      tabindex="-1"
+      aria-labelledby="editUserModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editUserModalLabel">Sửa Người dùng</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              th:action="@{/admin/users/update}"
+              method="post"
+              enctype="multipart/form-data"
+              class="needs-validation"
+              novalidate
+            >
+              <input type="hidden" id="editUserId" name="userId" />
+              <div class="mb-3">
+                <label for="editUserFullName" class="form-label"
+                  >Họ tên <span class="text-danger">*</span></label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editUserFullName"
+                  name="fullName"
+                  required
+                />
+                <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+              </div>
+              <div class="mb-3">
+                <label for="editUserEmail" class="form-label"
+                  >Email <span class="text-danger">*</span></label
+                >
+                <input
+                  type="email"
+                  class="form-control"
+                  id="editUserEmail"
+                  name="email"
+                  required
+                  pattern="^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"
+                />
+                <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+              </div>
+              <div class="mb-3">
+                <label for="editUserPhone" class="form-label"
+                  >Số điện thoại</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editUserPhone"
+                  name="phone"
+                  pattern="^[0-9]{10,11}$"
+                />
+                <div class="invalid-feedback">
+                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="editUserImage" class="form-label"
+                  >Ảnh đại diện mới</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="editUserImage"
+                  name="image"
+                  accept="image/*"
+                />
+                <small class="form-text text-muted"
+                  >Để trống nếu không muốn thay đổi ảnh.</small
+                >
+                <div class="mt-2">
+                  <label class="form-label">Ảnh hiện tại</label>
+                  <img
+                    id="currentUserImage"
+                    class="current-image"
+                    src=""
+                    alt="Current Image"
+                  />
+                </div>
+              </div>
+              <input type="hidden" id="editUserIsOnline" name="isOnline" />
+              <input type="hidden" id="editUserIsActive" name="isActive" />
+              <button type="submit" class="btn btn-primary">Cập nhật</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <th:block th:replace="~{fragments/back-to-top :: backToTop}"></th:block>
+
+    <!-- Include Footer Fragment -->
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Thay thế TinyMCE Cloud bằng TinyMCE stub -->
+    <script th:src="@{/js/tiny-stub.js}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Tự động ẩn thông báo sau 5 giây
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            alert.style.transition = "opacity 0.5s ease";
+            alert.style.opacity = "0";
+            setTimeout(() => alert.remove(), 500);
+          }, 5000);
+        });
+
+        // Xử lý chuyển tab để reset phân trang về trang 1
+        const tabLinks = document.querySelectorAll('.nav-tabs .nav-link');
+        tabLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+            // Lấy tab được click
+            const targetTab = this.getAttribute('href').substring(1); // Bỏ dấu # ở đầu
+            // Lấy URL hiện tại
+            const url = new URL(window.location.href);
+            // Cập nhật tham số tab
+            url.searchParams.set('tab', targetTab);
+            // Reset trang về trang 1 (page=0 vì đánh số từ 0)
+            url.searchParams.set('page', '0');
+            // Điều hướng đến URL mới
+            window.location.href = url.toString();
+            // Ngăn hành vi mặc định của thẻ a
+            e.preventDefault();
+          });
+        });
+
+        // Bootstrap form validation
+        var forms = document.querySelectorAll(".needs-validation");
+        Array.prototype.slice.call(forms).forEach(function (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        });
+
+        // Khởi tạo TinyMCE stub cho textarea thêm mới
+        tinymce.init({
+          selector: "#articleContent",
+          height: 400,
+        });
+
+        // Khi mở modal "Thêm Bài viết", đảm bảo khung soạn thảo trống
+        document
+          .getElementById("addArticleModal")
+          .addEventListener("show.bs.modal", function () {
+            const editorArea = document.querySelector(
+              "#addArticleModal .tiny-stub-content"
+            );
+            const textarea = document.getElementById("articleContent");
+            if (editorArea) {
+              editorArea.innerHTML = ""; // Làm trống khung soạn thảo
+            }
+            if (textarea) {
+              textarea.value = ""; // Làm trống textarea
+            }
+          });
+
+        // Xử lý nút Sửa cho Bài viết
+        document.querySelectorAll(".edit-article").forEach((button) => {
+          button.addEventListener("click", function () {
+            const id = this.getAttribute("data-id");
+            const title = this.getAttribute("data-title");
+            const image = this.getAttribute("data-image");
+            const content = this.getAttribute("data-content");
+
+            document.getElementById("editArticleId").value = id;
+            document.getElementById("editArticleTitle").value = title;
+            document.getElementById("currentArticleImage").src = image;
+            document.getElementById("editArticleContent").value = content;
+
+            // Khởi tạo TinyMCE stub cho textarea chỉnh sửa nếu chưa có
+            if (
+              !document.querySelector("#editArticleModal .tiny-stub-content")
+            ) {
+              tinymce.init({
+                selector: "#editArticleContent",
+                height: 400,
+              });
+            }
+
+            // Đặt nội dung vào khung soạn thảo sau khi modal hiển thị
+            setTimeout(function () {
+              tinymce.get("editArticleContent").setContent(content);
+            }, 100);
+          });
+        });
+
+        // Xử lý nút Sửa cho Bác sĩ
+        document.querySelectorAll(".edit-doctor").forEach((button) => {
+          button.addEventListener("click", function () {
+            const id = this.getAttribute("data-id");
+            const name = this.getAttribute("data-name");
+            const email = this.getAttribute("data-email");
+            const phone = this.getAttribute("data-phone");
+            const image = this.getAttribute("data-image");
+            const isOnline = this.getAttribute("data-isOnline") === "true";
+            const isActive = this.getAttribute("data-isActive") === "true";
+
+            document.getElementById("editDoctorId").value = id;
+            document.getElementById("editDoctorFullName").value = name;
+            document.getElementById("editDoctorEmail").value = email;
+            document.getElementById("editDoctorPhone").value = phone;
+            document.getElementById("currentDoctorImage").src = image;
+            document.getElementById("editDoctorIsOnline").value =
+              isOnline.toString();
+            document.getElementById("editDoctorIsActive").value =
+              isActive.toString();
+          });
+        });
+
+        // Xử lý nút Sửa cho Người dùng
+        document.querySelectorAll(".edit-user").forEach((button) => {
+          button.addEventListener("click", function () {
+            const id = this.getAttribute("data-id");
+            const name = this.getAttribute("data-name");
+            const email = this.getAttribute("data-email");
+            const phone = this.getAttribute("data-phone");
+            const image = this.getAttribute("data-image");
+            const isOnline = this.getAttribute("data-isOnline") === "true";
+            const isActive = this.getAttribute("data-isActive") === "true";
+
+            document.getElementById("editUserId").value = id;
+            document.getElementById("editUserFullName").value = name;
+            document.getElementById("editUserEmail").value = email;
+            document.getElementById("editUserPhone").value = phone;
+            document.getElementById("currentUserImage").src = image;
+            document.getElementById("editUserIsOnline").value =
+              isOnline.toString();
+            document.getElementById("editUserIsActive").value =
+              isActive.toString();
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

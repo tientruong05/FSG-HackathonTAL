@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="backToTop">
+      <button id="backToTop" class="back-to-top" title="Về đầu trang">
+        <i class="bi bi-arrow-up"></i>
+      </button>
+
+      <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+          const backToTopButton = document.getElementById("backToTop");
+
+          window.onscroll = function () {
+            if (
+              document.body.scrollTop > 200 ||
+              document.documentElement.scrollTop > 200
+            ) {
+              backToTopButton.classList.add("show");
+            } else {
+              backToTopButton.classList.remove("show");
+            }
+          };
+
+          backToTopButton.addEventListener("click", function () {
+            const scrollToTop = () => {
+              const currentPosition = window.pageYOffset;
+              if (currentPosition > 0) {
+                window.requestAnimationFrame(scrollToTop);
+                window.scrollTo(0, currentPosition - currentPosition / 16);
+              }
+            };
+            scrollToTop();
+          });
+        });
+      </script>
+    </div>
+  </body>
+</html>

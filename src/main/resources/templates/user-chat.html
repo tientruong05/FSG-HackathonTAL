@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:class="${loggedInUser != null && loggedInUser.role.roleName == 'user'} ? 'therapy-mode' : ''"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack GPT - Trò chuyện với Bác sĩ</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+    <!-- Thêm therapy theme fragment -->
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+    <style>
+      .chat-container {
+        max-width: 800px;
+        margin: 20px auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        border-radius: 15px;
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* CSS để ẩn bác sĩ đang bận trong modal */
+      .doctor-card.busy {
+        display: none !important;
+      }
+
+      .chat-header {
+        background-color: #4a8f7b;
+        color: #fff;
+        padding: 15px;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+      }
+
+      .chat-header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .chat-messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: #f1f3f5;
+      }
+
+      .message {
+        max-width: 70%;
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        border-radius: 10px;
+        display: inline-block;
+        word-break: break-word; /* Ngắt dòng tự động khi văn bản dài */
+        overflow-wrap: break-word; /* Hỗ trợ ngắt từ */
+        white-space: pre-wrap; /* Giữ định dạng và ngắt dòng tự nhiên */
+      }
+
+      .doctor-message {
+        background-color: #4a8f7b;
+        color: #fff;
+        align-self: flex-end;
+      }
+
+      .user-message {
+        background-color: #e9ecef;
+        color: #333;
+        align-self: flex-start;
+      }
+
+      .chat-input {
+        padding: 15px;
+        border-top: 1px solid #e6e6e6;
+        background-color: #fff;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+      }
+
+      .end-session {
+        margin-top: 10px;
+      }
+
+      .message-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .message-container.user {
+        align-items: flex-end;
+      }
+
+      .message-container.doctor {
+        align-items: flex-start;
+      }
+
+      .message-time {
+        font-size: 0.8em;
+        margin-top: 2px;
+        color: #6c757d;
+      }
+
+      /* CSS cho phân trang */
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        margin-bottom: 40px;
+      }
+
+      .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .pagination .page-item {
+        background-color: #fff;
+      }
+
+      .pagination .page-item:not(:last-child) {
+        border-right: 1px solid #f0f0f0;
+      }
+
+      .pagination .page-link {
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      .pagination .page-item.active .page-link {
+        background-color: #4a8f7b;
+        color: white;
+        font-weight: 600;
+      }
+
+      .pagination .page-item:not(.active) .page-link:hover {
+        background-color: #f8f9fa;
+        color: #4a8f7b;
+      }
+
+      .pagination .page-item.disabled .page-link {
+        color: #ccc;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <!-- Thêm doctors-modal fragment -->
+    <th:block
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></th:block>
+
+    <div class="chat-container">
+      <div class="chat-header">
+        <img th:src="${doctor.image}" alt="Doctor" />
+        <span th:text="'Trò chuyện với Bác sĩ: ' + ${doctor.fullName}"></span>
+        <div
+          id="connectionStatus"
+          style="margin-left: auto; font-size: 12px; display: none"
+        >
+          <span class="badge bg-warning">Đang kết nối...</span>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <!-- Tin nhắn sẽ được thêm bằng JavaScript -->
+      </div>
+      <div class="chat-input">
+        <form id="chatForm">
+          <div class="input-group">
+            <input
+              type="hidden"
+              name="sessionId"
+              th:value="${chatSession != null ? chatSession.sessionId : ''}"
+            />
+            <input
+              type="text"
+              class="chat-input-field"
+              id="chatInput"
+              name="messageContent"
+              placeholder="Nhập tin nhắn..."
+              autocomplete="off"
+              th:disabled="${chatSession != null ? chatSession.endTime != null : false}"
+            />
+            <button
+              class="chat-send-button"
+              type="submit"
+              th:disabled="${chatSession != null ? chatSession.endTime != null : false}"
+            >
+              <i class="bi bi-send"></i>
+            </button>
+          </div>
+        </form>
+        <div class="end-session text-end">
+          <button
+            th:if="${chatSession != null && chatSession.endTime == null}"
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            onclick="showConfirmEndUserChatModal()"
+          >
+            Kết thúc phiên chat
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div
+      class="modal fade"
+      id="ratingModal"
+      tabindex="-1"
+      aria-labelledby="ratingModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ratingModalLabel">Đánh giá bác sĩ</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body text-center">
+            <p>
+              Bác sĩ
+              <span id="doctorNameSpan" th:text="${doctor.fullName}"></span> có
+              làm bạn hài lòng không?
+            </p>
+            <div class="d-flex justify-content-center mt-4">
+              <button
+                type="button"
+                class="btn btn-primary mx-2"
+                onclick="endChatWithLike()"
+              >
+                <i class="bi bi-hand-thumbs-up-fill me-1"></i> Có, tôi hài lòng
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary mx-2"
+                onclick="endChatWithoutLike()"
+              >
+                <i class="bi bi-hand-thumbs-down me-1"></i> Không, lần sau tôi
+                sẽ đánh giá
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm End User Chat Modal -->
+    <div
+      class="modal fade"
+      id="confirmEndUserChatModal"
+      tabindex="-1"
+      aria-labelledby="confirmEndUserChatModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmEndUserChatModalLabel">
+              Xác nhận kết thúc phiên chat
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Bạn có chắc chắn muốn kết thúc phiên trò chuyện này không?
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="confirmEndUserChatBtn"
+            >
+              Xác nhận kết thúc
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script th:inline="javascript">
+      let stompClient = null;
+      let messageInput = null;
+      let chatMessages = null;
+      let notificationSound = null;
+      let userHasInteracted = false;
+      let sessionId = null;
+      let ratingModal = null;
+      let confirmEndUserChatModal = null;
+      let doctorId = null;
+      let currentSessionId = null;
+
+      // Hiển thị tin nhắn trong giao diện
+      function displayMessage(msg) {
+        if (!chatMessages) {
+          chatMessages = document.getElementById("chatMessages");
+          if (!chatMessages) {
+            console.error("Chat messages container not found!");
+            return;
+          }
+        }
+
+        // Kiểm tra nếu là thông báo kết thúc chat
+        if (msg.type === "CHAT_ENDED") {
+          console.log("Phiên chat đã kết thúc:", msg);
+
+          // Kiểm tra xem đã có thông báo kết thúc phiên chat chưa
+          const existingEndMessage = Array.from(
+            chatMessages.querySelectorAll(".system-message")
+          ).find((msg) => msg.textContent.includes("Phiên chat đã kết thúc"));
+
+          // Nếu đã có thông báo, không hiển thị lại
+          if (existingEndMessage) {
+            return;
+          }
+
+          // Hiển thị thông báo trong khung chat
+          const systemMessage = document.createElement("div");
+          systemMessage.className = "system-message";
+          systemMessage.textContent = "Phiên chat đã kết thúc";
+          systemMessage.style.textAlign = "center";
+          systemMessage.style.margin = "10px auto";
+          systemMessage.style.color = "#6c757d";
+          systemMessage.style.fontStyle = "italic";
+          chatMessages.appendChild(systemMessage);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+
+          // Vô hiệu hóa input chat
+          disableChatInput();
+          return;
+        }
+
+        const isCurrentUser =
+          String(msg.senderId) === String(window.currentUserId);
+        const messageContainer = document.createElement("div");
+
+        // Đặt class cho message container dựa vào người gửi
+        // Người dùng đang đăng nhập ở bên phải (user), bác sĩ ở bên trái (doctor)
+        messageContainer.className =
+          "message-container " + (isCurrentUser ? "user" : "doctor");
+
+        if (msg._clientId) {
+          messageContainer.setAttribute("data-client-id", msg._clientId);
+        }
+
+        const messageElement = document.createElement("div");
+
+        // Đặt class cho tin nhắn dựa vào người gửi
+        // Tin nhắn của người dùng đang đăng nhập luôn màu xanh (doctor-message)
+        // Tin nhắn của bác sĩ luôn màu xám (user-message)
+        messageElement.className =
+          "message " + (isCurrentUser ? "doctor-message" : "user-message");
+        messageElement.textContent = msg.messageContent;
+
+        const timeElement = document.createElement("div");
+        timeElement.className = "message-time";
+        try {
+          const msgDate = new Date(msg.sentAt);
+          if (!isNaN(msgDate.getTime())) {
+            const options = {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            };
+            timeElement.textContent = msgDate.toLocaleTimeString(
+              "vi-VN",
+              options
+            );
+          } else {
+            timeElement.textContent = "--:--";
+          }
+        } catch (e) {
+          console.error("Error formatting time", e);
+          timeElement.textContent = "--:--";
+        }
+
+        messageContainer.appendChild(messageElement);
+        messageContainer.appendChild(timeElement);
+        chatMessages.appendChild(messageContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // Thêm tin nhắn vào giao diện, tránh trùng lặp
+      function addMessageToChat(msg) {
+        if (!chatMessages) {
+          chatMessages = document.getElementById("chatMessages");
+          if (!chatMessages) {
+            console.error("Chat messages container not found!");
+            return;
+          }
+        }
+
+        if (
+          msg._clientId &&
+          document.querySelector(`[data-client-id="${msg._clientId}"]`)
+        ) {
+          console.log(
+            "Message already displayed, skipping duplicate",
+            msg._clientId
+          );
+          return;
+        }
+
+        displayMessage(msg);
+      }
+
+      // Gửi tin nhắn
+      function sendMessage(event) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        const sessionId = document.querySelector(
+          'input[name="sessionId"]'
+        ).value;
+        if (!sessionId || !window.currentUserId) {
+          console.error("Session ID or User ID not available");
+          return;
+        }
+
+        if (!messageInput) {
+          messageInput = document.getElementById("chatInput");
+          if (!messageInput) {
+            console.error("Message input element not found");
+            return;
+          }
+        }
+
+        const messageContent = messageInput.value.trim();
+        if (!messageContent) {
+          console.log("Empty message, nothing to send");
+          return;
+        }
+
+        const clientId =
+          "msg_" +
+          new Date().getTime() +
+          "_" +
+          Math.random().toString(36).substr(2, 9);
+        const messageData = {
+          sessionId: sessionId,
+          senderId: window.currentUserId,
+          messageContent: messageContent,
+          sentAt: new Date(),
+          _clientId: clientId,
+        };
+
+        console.log("Sending message:", messageData);
+        addMessageToChat(messageData);
+        messageInput.value = "";
+
+        if (stompClient && stompClient.connected) {
+          stompClient.send(
+            "/app/chat.sendMessage",
+            {},
+            JSON.stringify(messageData)
+          );
+        } else {
+          console.warn("WebSocket not connected, falling back to REST API");
+          fetch("/send-message", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(messageData),
+          })
+            .then((response) => {
+              if (!response.ok)
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              return response.json();
+            })
+            .then((data) => console.log("Message sent via REST API:", data))
+            .catch((error) => {
+              console.error("Error sending message via REST:", error);
+              alert("Không thể gửi tin nhắn. Vui lòng thử lại.");
+            });
+        }
+        return false;
+      }
+
+      // Kết nối WebSocket
+      function connectWebSocket(sessionId) {
+        const connectionStatus = document.getElementById("connectionStatus");
+        if (connectionStatus) {
+          connectionStatus.style.display = "block";
+          connectionStatus.innerHTML =
+            '<span class="badge bg-warning">Đang kết nối...</span>';
+        }
+
+        const socket = new SockJS("/ws-chat");
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect(
+          {},
+          function (frame) {
+            console.log("Kết nối WebSocket thành công:", frame);
+            if (connectionStatus) {
+              connectionStatus.innerHTML =
+                '<span class="badge bg-success">Đã kết nối</span>';
+              setTimeout(() => (connectionStatus.style.display = "none"), 3000);
+            }
+
+            console.log("Subscribing to topic: /topic/chat." + sessionId);
+            stompClient.subscribe(
+              "/topic/chat." + sessionId,
+              function (message) {
+                const messageData = JSON.parse(message.body);
+                console.log("Nhận tin nhắn từ WebSocket:", messageData);
+
+                // Kiểm tra nếu là thông báo kết thúc chat
+                if (messageData.type === "CHAT_ENDED") {
+                  console.log(
+                    "Phiên chat đã kết thúc bởi phía bác sĩ:",
+                    messageData
+                  );
+
+                  // Vô hiệu hóa input chat
+                  disableChatInput();
+
+                  // Kiểm tra xem đã có thông báo kết thúc phiên chat chưa
+                  const existingEndMessage = Array.from(
+                    chatMessages.querySelectorAll(".system-message")
+                  ).find((msg) =>
+                    msg.textContent.includes("Phiên chat đã kết thúc")
+                  );
+
+                  // Chỉ thêm thông báo nếu chưa có
+                  if (!existingEndMessage) {
+                    // Hiển thị thông báo trong khung chat
+                    const systemMessage = document.createElement("div");
+                    systemMessage.className = "system-message";
+                    systemMessage.textContent = "Phiên chat đã kết thúc";
+                    systemMessage.style.textAlign = "center";
+                    systemMessage.style.margin = "10px auto";
+                    systemMessage.style.color = "#6c757d";
+                    systemMessage.style.fontStyle = "italic";
+                    chatMessages.appendChild(systemMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                  }
+
+                  // Hiển thị modal thông báo nếu chưa hiển thị
+                  if (!successModal) {
+                    successModal = new bootstrap.Modal(
+                      document.getElementById("successModal")
+                    );
+                  }
+                  const successMessageEl =
+                    document.getElementById("successMessage");
+                  if (successMessageEl) {
+                    successMessageEl.textContent =
+                      "Bác sĩ đã kết thúc phiên chat.";
+                  }
+                  successModal.show();
+                  return;
+                }
+
+                addMessageToChat(messageData);
+
+                if (messageData.senderId != window.currentUserId) {
+                  // Phát âm thanh thông báo khi có tin nhắn mới
+                  console.log("Đang phát âm thanh thông báo cho tin nhắn mới");
+                  notificationSound.currentTime = 0;
+                  notificationSound.volume = 1;
+                  notificationSound
+                    .play()
+                    .catch((e) => console.error("Không thể phát âm thanh:", e));
+                  showNotification(doctorName, messageData.messageContent);
+                }
+              }
+            );
+          },
+          function (error) {
+            console.error("Lỗi kết nối WebSocket:", error);
+            if (connectionStatus) {
+              connectionStatus.style.display = "block";
+              connectionStatus.innerHTML =
+                '<span class="badge bg-danger">Mất kết nối</span>';
+            }
+            setTimeout(() => connectWebSocket(sessionId), 5000);
+          }
+        );
+      }
+
+      // Hiển thị thông báo trình duyệt
+      function showNotification(title, message) {
+        console.log(
+          "Attempting to show notification - Title:",
+          title,
+          "Message:",
+          message
+        );
+        if (
+          "Notification" in window &&
+          Notification.permission === "granted" &&
+          document.visibilityState !== "visible"
+        ) {
+          const notification = new Notification(title, {
+            body: message,
+            icon: "/images/favicon.ico",
+          });
+          notification.onclick = function () {
+            window.focus();
+            notification.close();
+          };
+          setTimeout(() => notification.close(), 5000);
+        }
+      }
+
+      // Khởi tạo khi trang tải
+      document.addEventListener("DOMContentLoaded", function () {
+        const sessionId = /*[[${chatSession.sessionId}]]*/ null;
+        const userId = /*[[${loggedInUser.userId}]]*/ null;
+        const isSessionEnded = /*[[${chatSession != null ? chatSession.endTime != null : false}]]*/ false;
+        const doctorName = /*[[${doctor.fullName}]]*/ "Bác sĩ";
+
+        window.currentUserId = userId;
+        notificationSound = new Audio("/sounds/notification.mp3");
+
+        if (sessionId && userId) {
+          chatMessages = document.getElementById("chatMessages");
+          messageInput = document.getElementById("chatInput");
+
+          const chatForm = document.getElementById("chatForm");
+          if (chatForm) {
+            chatForm.addEventListener("submit", function (event) {
+              userHasInteracted = true; // Đánh dấu tương tác khi gửi tin nhắn
+              sendMessage(event);
+              return false;
+            });
+          } else {
+            console.error("Chat form not found!");
+          }
+
+          // Hiển thị thông báo yêu cầu tương tác nếu chưa tương tác
+          if (!userHasInteracted) {
+            // Đánh dấu người dùng đã tương tác ngay từ đầu
+            userHasInteracted = true;
+            console.log("Đánh dấu người dùng đã tương tác từ đầu");
+
+            // Preload âm thanh một cách im lặng
+            notificationSound.volume = 0;
+            notificationSound
+              .play()
+              .then(() => {
+                notificationSound.pause();
+                notificationSound.currentTime = 0;
+                notificationSound.volume = 1;
+                console.log("Âm thanh đã được preload thành công");
+              })
+              .catch((e) => {
+                console.error(
+                  "Không thể preload âm thanh, sẽ thử lại khi người dùng nhập tin nhắn:",
+                  e
+                );
+              });
+          }
+
+          // Tải lịch sử tin nhắn
+          fetch(`/chat-history/${sessionId}`)
+            .then((response) => {
+              if (!response.ok)
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              return response.json();
+            })
+            .then((data) => {
+              chatMessages.innerHTML = "";
+              let messages = data.messages || [];
+              if (messages.length > 0) {
+                messages.forEach((msg) => displayMessage(msg));
+              } else {
+                const systemMessage = document.createElement("div");
+                systemMessage.className = "system-message";
+                systemMessage.textContent = "Phiên chat mới bắt đầu";
+                systemMessage.style.textAlign = "center";
+                systemMessage.style.margin = "10px auto";
+                systemMessage.style.color = "#6c757d";
+                systemMessage.style.fontStyle = "italic";
+                chatMessages.appendChild(systemMessage);
+              }
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch((error) => {
+              console.error("Error fetching message history:", error);
+            });
+
+          // Kết nối WebSocket nếu phiên chưa kết thúc
+          if (!isSessionEnded) {
+            connectWebSocket(sessionId);
+          } else {
+            messageInput.disabled = true;
+            messageInput.placeholder = "Phiên trò chuyện đã kết thúc";
+            const submitButton = chatForm.querySelector(
+              "button[type='submit']"
+            );
+            if (submitButton) submitButton.disabled = true;
+          }
+
+          // Yêu cầu quyền thông báo
+          if (
+            "Notification" in window &&
+            Notification.permission !== "granted" &&
+            Notification.permission !== "denied"
+          ) {
+            Notification.requestPermission();
+          }
+
+          // Khởi tạo modal xác nhận
+          if (!confirmEndUserChatModal) {
+            confirmEndUserChatModal = new bootstrap.Modal(
+              document.getElementById("confirmEndUserChatModal")
+            );
+          }
+        } else {
+          console.error("Session ID hoặc User ID không tồn tại!");
+        }
+
+        const confirmBtn = document.getElementById("confirmEndUserChatBtn");
+        if (confirmBtn) {
+          confirmBtn.addEventListener("click", function () {
+            executeEndUserChat();
+          });
+        }
+      });
+
+      // Hiển thị modal đánh giá khi kết thúc chat
+      function showEndChatDialog() {
+        if (!ratingModal) {
+          ratingModal = new bootstrap.Modal(
+            document.getElementById("ratingModal")
+          );
+        }
+        ratingModal.show();
+      }
+
+      // Kết thúc chat và thích bác sĩ
+      function endChatWithLike() {
+        if (!sessionId) {
+          sessionId = document.querySelector('input[name="sessionId"]')?.value;
+        }
+        // Lấy doctorId đã lưu từ biến toàn cục
+        if (!doctorId) {
+          console.error("Doctor ID not found to like.");
+          // Chỉ ẩn modal đánh giá
+          if (ratingModal) ratingModal.hide();
+          return;
+        }
+
+        console.log(
+          `Liking doctor ID: ${doctorId} after ending session: ${sessionId}`
+        );
+
+        // Ẩn modal đánh giá trước khi gọi API
+        if (ratingModal) {
+          ratingModal.hide();
+        }
+
+        // Gọi API để thích bác sĩ
+        fetch(`/like-doctor/${doctorId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Thêm header CSRF nếu cần
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              console.warn("Like doctor request failed.");
+            }
+            return response.ok
+              ? response.json()
+              : Promise.resolve({ success: false });
+          })
+          .then((data) => {
+            if (data.success) {
+              console.log(`Doctor ${doctorId} liked successfully.`);
+              // Không cần làm gì thêm sau khi ẩn modal
+              // Có thể thêm Toast nếu muốn: showToast("Cảm ơn bạn đã đánh giá!");
+            } else {
+              console.log("Failed to record like.");
+              // Không cần làm gì thêm sau khi ẩn modal
+            }
+          })
+          .catch((error) => {
+            console.error("Error liking doctor:", error);
+            // Không cần làm gì thêm sau khi ẩn modal
+          });
+      }
+
+      // Kết thúc chat không thích bác sĩ
+      function endChatWithoutLike() {
+        // Không cần gọi API kết thúc ở đây nữa vì đã kết thúc trước đó
+
+        // Chỉ cần đóng modal đánh giá
+        if (ratingModal) {
+          ratingModal.hide();
+        }
+
+        // Không cần hiển thị modal thành công nữa
+        // showSuccessModal("Phiên chat đã kết thúc.");
+
+        // Input đã được vô hiệu hóa trong executeEndUserChat
+      }
+
+      // Vô hiệu hóa input chat sau khi kết thúc
+      function disableChatInput() {
+        if (!messageInput) {
+          messageInput = document.getElementById("chatInput");
+        }
+        if (messageInput) {
+          messageInput.disabled = true;
+          messageInput.placeholder = "Phiên trò chuyện đã kết thúc";
+        }
+
+        const submitButton = document.querySelector(
+          "#chatForm button[type='submit']"
+        );
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+
+        const endButton = document.querySelector(".end-session button");
+        if (endButton) {
+          endButton.style.display = "none";
+        }
+      }
+
+      // Hiển thị modal xác nhận kết thúc chat của người dùng
+      function showConfirmEndUserChatModal() {
+        if (!confirmEndUserChatModal) {
+          console.error("Confirm End User Chat Modal instance not found!");
+          // Fallback nếu modal chưa khởi tạo
+          if (confirm("Bạn có chắc chắn muốn kết thúc phiên trò chuyện này?")) {
+            executeEndUserChat();
+          }
+          return;
+        }
+        confirmEndUserChatModal.show();
+      }
+
+      // Hàm hiển thị modal đánh giá (tách ra để dễ gọi)
+      function showRatingModal() {
+        if (!ratingModal) {
+          ratingModal = new bootstrap.Modal(
+            document.getElementById("ratingModal")
+          );
+        }
+        ratingModal.show();
+      }
+
+      // Hàm thực thi việc kết thúc phiên chat từ phía người dùng
+      function executeEndUserChat() {
+        if (!sessionId) {
+          sessionId = document.querySelector('input[name="sessionId"]')?.value;
+        }
+
+        if (!sessionId) {
+          console.error("Session ID not found to end chat.");
+          alert("Lỗi: Không thể xác định phiên chat để kết thúc.");
+          return;
+        }
+
+        // Ẩn modal xác nhận nếu đang mở
+        if (confirmEndUserChatModal) {
+          confirmEndUserChatModal.hide();
+        }
+
+        console.log(`Attempting to end chat session: ${sessionId}`);
+
+        // Gọi API để kết thúc chat
+        fetch(`/end-chat/${sessionId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Thêm header CSRF nếu cần
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              // Thử parse lỗi từ server nếu có
+              return response.json().then((err) => {
+                throw new Error(
+                  err.error || `HTTP error! Status: ${response.status}`
+                );
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              console.log(
+                `Chat session ${sessionId} ended successfully by user.`
+              );
+              // Vô hiệu hóa input
+              disableChatInput();
+
+              // Hiển thị thông báo kết thúc trong chat (tùy chọn)
+              /* Bỏ phần này
+              const chatMessages = document.getElementById("chatMessages");
+              if (chatMessages) {
+                const systemMessage = document.createElement("div");
+                systemMessage.className =
+                  "system-message text-center my-2 text-muted fst-italic";
+                systemMessage.textContent = "Bạn đã kết thúc phiên chat";
+                chatMessages.appendChild(systemMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+              }
+              */
+
+              // Hiển thị modal đánh giá SAU KHI kết thúc thành công
+              showRatingModal();
+            } else {
+              // Lỗi từ phía server (ví dụ: session đã kết thúc)
+              throw new Error(
+                data.error || "Lỗi không xác định từ server khi kết thúc chat."
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error ending chat session:", error);
+            alert(`Có lỗi xảy ra khi kết thúc phiên chat: ${error.message}`);
+          });
+      }
+
+      // Định nghĩa hàm openDoctorModal toàn cục
+      window.openDoctorModal = function () {
+        console.log("Opening doctor modal with global function");
+        const modalElement = document.getElementById("doctorSelectionModal");
+        if (modalElement) {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+          const loadingIndicator =
+            document.getElementById("doctorModalLoading");
+          const contentArea = document.getElementById("doctorModalBodyContent");
+
+          if (!loadingIndicator || !contentArea) {
+            console.error("Modal loading or content area not found!");
+            return;
+          }
+
+          // Show loading indicator and hide content
+          loadingIndicator.style.display = "block";
+          contentArea.style.display = "none";
+
+          // Show the modal shell immediately while loading
+          modal.show();
+
+          // Fetch updated content
+          fetch("/doctor-selection-content?_=" + new Date().getTime(), {
+            method: "GET",
+            headers: {
+              Accept: "text/html", // Expecting HTML fragment
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "Network response was not ok: " + response.statusText
+                );
+              }
+              return response.text();
+            })
+            .then((html) => {
+              // Replace the content area's innerHTML with the fetched fragment
+              contentArea.innerHTML = html;
+
+              // Ẩn các bác sĩ đang bận
+              setTimeout(() => {
+                const busyDoctors =
+                  contentArea.querySelectorAll(".doctor-card.busy");
+                busyDoctors.forEach((card) => {
+                  card.style.display = "none";
+                });
+                console.log(`Đã ẩn ${busyDoctors.length} bác sĩ đang bận`);
+              }, 100);
+
+              // Hide loading and show content
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+              console.log("Modal content updated.");
+            })
+            .catch((error) => {
+              console.error("Error fetching or updating modal content:", error);
+              // Display an error message within the modal
+              contentArea.innerHTML =
+                '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách bác sĩ. Vui lòng thử lại sau.</div>';
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+            });
+        } else {
+          console.error("Doctor selection modal element not found");
+          alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+        }
+      };
+
+      // Thêm event listener cho nút "Chat với bác sĩ" khi trang được tải xong
+      document.addEventListener("DOMContentLoaded", function () {
+        // Lắng nghe nút "Chat với bác sĩ" trong navbar
+        const chatButton = document.querySelector("#chat-doctor-navbar-btn");
+        if (chatButton) {
+          chatButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            console.log("Opening doctor modal from navbar button");
+            if (typeof openDoctorModal === "function") {
+              openDoctorModal();
+            } else {
+              console.error("openDoctorModal function not found");
+              alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+            }
+          });
+        } else {
+          console.log("Chat doctor button not found in navbar");
+        }
+      });
+    </script>
+  </body>
+</html>

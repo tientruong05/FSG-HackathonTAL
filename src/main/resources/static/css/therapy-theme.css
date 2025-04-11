@@ -1,0 +1,724 @@
+/* Dark Theme - Giao diện tối */
+
+/* CSS Variables cho theme tối */
+:root.dark-mode {
+  /* Màu nền tối */
+  --bg-primary: #1e2029;
+  --bg-secondary: #252836;
+  --bg-tertiary: #2a2d3e;
+
+  /* Màu chữ */
+  --text-primary: #e0e0e0;
+  --text-secondary: #b3b3b3;
+  --text-muted: #8e8e8e;
+
+  /* Màu nhấn - calming colors */
+  --accent-primary: #6c8fb5; /* Xanh dương nhạt - gợi sự bình yên */
+  --accent-secondary: #7d92a7; /* Xanh xám - giảm căng thẳng */
+  --accent-tertiary: #8a90b1; /* Tím nhạt - thư giãn */
+  --accent-success: #7aa686; /* Xanh lá nhạt - hy vọng */
+
+  /* Màu viền */
+  --border-color: #3a3f55;
+
+  /* Màu ô input, card */
+  --input-bg: #2f3347;
+  --card-bg: #2a2d3e;
+
+  /* Màu nút */
+  --btn-primary-bg: #5d7fa6;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #3a4055;
+  --btn-secondary-text: #e0e0e0;
+
+  /* Ghi đè biến màu của CSS gốc */
+  --primary-color: #5d7fa6;
+  --secondary-color: #3a4055;
+  --text-color: #e0e0e0;
+  --light-color: #2a2d3e;
+  --dark-color: #1e2029;
+}
+
+/* Áp dụng các biến màu cho các phần tử */
+body.dark-mode {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Header & Navigation */
+body.dark-mode .navbar,
+body.dark-mode header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-mode .navbar a,
+body.dark-mode nav a {
+  color: var(--text-primary);
+}
+
+body.dark-mode .navbar a:hover,
+body.dark-mode nav a:hover {
+  color: var(--accent-primary);
+}
+
+/* Hero Section - giữ nguyên ảnh background */
+body.dark-mode .hero-section {
+  /* Đổi màu nền thành màu tối khi ở dark mode */
+  background: var(--bg-tertiary);
+  position: relative;
+}
+
+body.dark-mode .hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3); /* Điều chỉnh độ tối của overlay */
+}
+
+body.dark-mode .hero-content {
+  position: relative;
+  z-index: 1; /* Đảm bảo nội dung hiển thị trên overlay */
+  color: var(--text-primary); /* Màu chữ cho nội dung hero */
+}
+
+/* Cards, Containers, Sections */
+body.dark-mode .card,
+body.dark-mode .container-box,
+body.dark-mode section.content,
+body.dark-mode .service-card,
+body.dark-mode .profile-card,
+body.dark-mode .article-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+/* Service cards */
+body.dark-mode .service-card {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .service-card .service-icon {
+  color: var(--accent-primary);
+}
+
+body.dark-mode .service-card h4 {
+  color: var(--text-primary);
+}
+
+body.dark-mode .btn-service {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+/* Content Sections */
+body.dark-mode .content-section,
+body.dark-mode .article-section,
+body.dark-mode .cta-section {
+  background-color: var(--bg-primary);
+}
+
+/* Forms và Input */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* Thêm style cho placeholder */
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder,
+body.dark-mode select::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+  border-color: var(--accent-primary);
+}
+
+/* Buttons */
+body.dark-mode .btn-primary,
+body.dark-mode button.primary,
+body.dark-mode .btn-login {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+body.dark-mode .btn-secondary,
+body.dark-mode button.secondary {
+  background-color: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+}
+
+/* Links */
+body.dark-mode a {
+  color: var(--accent-primary);
+}
+
+body.dark-mode a:hover {
+  color: var(--accent-tertiary);
+}
+
+/* Tables */
+body.dark-mode table {
+  border-color: var(--border-color);
+}
+
+body.dark-mode th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+body.dark-mode tr:nth-child(even) {
+  background-color: var(--bg-secondary);
+}
+
+body.dark-mode tr:nth-child(odd) {
+  background-color: var(--bg-tertiary);
+}
+
+/* Chat elements - nếu có chat UI */
+body.dark-mode .chat-container {
+  background-color: var(--bg-secondary);
+}
+
+body.dark-mode .chat-message.sent {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+body.dark-mode .chat-message.received {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Footer */
+body.dark-mode footer {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+/* Modal styles */
+body.dark-mode .modal-content {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+  border-color: var(--border-color);
+}
+
+body.dark-mode .dropdown-menu {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .dropdown-item {
+  color: var(--text-primary);
+}
+
+body.dark-mode .dropdown-item:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--accent-primary);
+}
+
+/* Nút Theme toggle */
+#theme-toggle {
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #ccc;
+}
+
+#theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+#theme-toggle i {
+  font-size: 18px;
+}
+
+body.dark-mode #theme-toggle {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: #f8e3a1; /* Màu vàng nhẹ cho icon mặt trời */
+}
+
+body.dark-mode #theme-toggle:hover {
+  background-color: var(--bg-secondary);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+body:not(.dark-mode) #theme-toggle {
+  color: #5c6bc0; /* Màu xanh tím nhạt cho icon mặt trăng */
+}
+
+/* Hiệu ứng chuyển đổi mượt mà */
+body,
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* FIX: Homepage - CTA Section */
+body.dark-mode .cta-section {
+  background-color: var(--bg-secondary);
+  padding: 80px 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-mode .cta-title,
+body.dark-mode .cta-subtitle {
+  color: var(--text-primary);
+}
+
+/* FIX: Articles page */
+body.dark-mode .articles-hero-section,
+body.dark-mode .hero-section {
+  background: var(--bg-tertiary) !important;
+  background-image: none !important;
+}
+
+body.dark-mode .articles-hero-section::before,
+body.dark-mode .hero-section::before {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Nút đọc bài */
+body.dark-mode .btn-article,
+body.dark-mode .btn-read {
+  background-color: var(--btn-primary-bg);
+  color: var(--text-primary) !important;
+  border-color: var(--border-color);
+}
+
+body.dark-mode .btn-article:hover,
+body.dark-mode .btn-read:hover {
+  background-color: var(--accent-secondary);
+  color: var(--btn-primary-text) !important;
+  border-color: var(--accent-secondary);
+}
+
+/* Nút trò chuyện ở trang bác sĩ nổi bật */
+body.dark-mode .btn-chat {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text) !important;
+  border-color: var(--border-color);
+}
+
+body.dark-mode .btn-chat:hover {
+  background-color: var(--accent-secondary);
+  color: var(--btn-primary-text) !important;
+  border-color: var(--accent-secondary);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(93, 127, 166, 0.4);
+}
+
+/* FIX: Article detail page */
+body.dark-mode .related-articles h3 {
+  color: var(--rimary-color);
+  padding-bottom: 10px;
+}
+
+body.dark-mode .related-article-card,
+body.dark-mode .related-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  margin-bottom: 15px;
+}
+
+body.dark-mode .related-article-card h5,
+body.dark-mode .related-card h5 {
+  color: var(--text-primary);
+}
+
+body.dark-mode .related-article-card p,
+body.dark-mode .related-card p {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .related-article-card a {
+  color: var(--accent-primary);
+}
+
+body.dark-mode .related-article-card a:hover {
+  color: var(--accent-tertiary);
+}
+
+/* FIX: Chatbot page */
+body.dark-mode .chatbot-container,
+body.dark-mode .chat-window {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .chat-header {
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-mode .chat-messages {
+  background-color: var(--bg-secondary);
+}
+
+body.dark-mode .message-bubble {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .message-bubble.user {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+body.dark-mode .chat-input-container {
+  background-color: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+}
+
+body.dark-mode .chat-input {
+  background-color: var(--input-bg);
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .chat-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+body.dark-mode .chat-send-btn {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+/* FIX: Doctor modal */
+body.dark-mode .list-group-item {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .list-group-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+body.dark-mode .list-group-item.active {
+  background-color: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+body.dark-mode .doctor-card {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .doctor-info h5,
+body.dark-mode .doctor-info p {
+  color: var(--text-primary);
+}
+
+/* FIX: Text muted trong doctor modal */
+body.dark-mode .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* FIX: Chat with doctor */
+body.dark-mode .user-chat-container,
+body.dark-mode .chat-area {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .chat-header {
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+body.dark-mode .chat-messages {
+  background-color: var(--bg-secondary);
+}
+
+body.dark-mode .message-user,
+body.dark-mode .message-doctor {
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .message-content {
+  color: var(--text-primary);
+}
+
+body.dark-mode .message-user {
+  background-color: var(--accent-primary);
+}
+
+body.dark-mode .message-user .message-content {
+  color: white;
+}
+
+body.dark-mode .message-doctor {
+  background-color: var(--bg-tertiary);
+}
+
+body.dark-mode .chat-input-wrapper textarea,
+body.dark-mode #messageContent {
+  background-color: var(--input-bg);
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .chat-input-wrapper textarea::placeholder,
+body.dark-mode #messageContent::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+body.dark-mode .message-time {
+  color: var(--text-muted);
+}
+
+/* FIX: Nav tabs trong auth modal */
+body.dark-mode .nav-tabs .nav-link {
+  color: var(--text-secondary);
+  background-color: transparent;
+  border-color: transparent;
+}
+
+body.dark-mode .nav-tabs .nav-link:hover {
+  border-color: var(--border-color);
+}
+
+body.dark-mode .nav-tabs .nav-link.active {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  border-bottom-color: transparent;
+}
+
+/* Thêm navbar-scrolled cho dark mode */
+body.dark-mode .navbar-scrolled {
+  background-color: rgba(
+    42,
+    45,
+    62,
+    0.95
+  ) !important; /* Sử dụng bg-tertiary với độ trong suốt */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Điều chỉnh special feature card trong dark mode */
+body.dark-mode .service-card.special-feature {
+  background: linear-gradient(
+    135deg,
+    var(--bg-tertiary) 0%,
+    var(--bg-secondary) 100%
+  );
+  border: 1px dashed var(--accent-primary);
+}
+
+body.dark-mode .service-card.special-feature h4 {
+  color: var(--accent-tertiary);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 1.5rem;
+}
+
+body.dark-mode .service-card.special-feature p {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .btn-rest {
+  border: 2px solid var(--accent-tertiary);
+  color: var(--accent-tertiary);
+}
+
+body.dark-mode .btn-rest:hover {
+  background-color: var(--accent-tertiary);
+  color: var(--bg-primary);
+}
+
+/* Điều chỉnh back-to-top button trong dark mode */
+body.dark-mode .back-to-top {
+  background-color: var(--accent-primary);
+}
+
+body.dark-mode .back-to-top:hover {
+  background-color: var(--accent-tertiary);
+}
+
+/* Fix màu cho tiêu đề bài viết khi hover trong dark mode */
+body.dark-mode .article-card:hover h4 {
+  color: var(--accent-tertiary);
+}
+
+/* Fix màu cho article container trong dark mode */
+body.dark-mode .article-container {
+  background-color: var(--bg-secondary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .article-detail-title {
+  color: var(--accent-primary);
+}
+
+body.dark-mode .article-detail-title::after {
+  background-color: var(--accent-primary);
+}
+
+body.dark-mode .article-detail-meta {
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-mode .article-detail-content p {
+  color: var(--text-primary);
+}
+
+body.dark-mode .meta-icon {
+  color: var(--accent-primary);
+}
+
+body.dark-mode .related-card {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .related-card h5 {
+  color: var(--accent-primary);
+}
+
+body.dark-mode .related-card:hover h5 {
+  color: var(--accent-tertiary);
+}
+
+/* Định nghĩa class riêng cho chat input & button để tránh xung đột với Bootstrap */
+.chat-input .input-group {
+  position: relative;
+  border-radius: 30px; /* Bo tròn nhiều hơn */
+  overflow: hidden; /* Ẩn phần thừa của nút */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Shadow nhẹ */
+  background-color: #ffffff; /* Màu nền light mode */
+  border: 1px solid #dee2e6; /* Viền nhẹ light mode */
+  transition: all 0.3s ease;
+}
+
+.chat-input .input-group:focus-within {
+  border-color: #4a8f7b;
+  box-shadow: 0 0 0 0.2rem rgba(74, 143, 123, 0.25); /* Hiệu ứng focus */
+}
+
+/* Class riêng cho input chat */
+.chat-input-field {
+  border-radius: 30px; /* Bo tròn input */
+  padding-right: 55px; /* Khoảng trống cho nút gửi */
+  padding-left: 20px;
+  border: none; /* Bỏ viền mặc định, input-group đã có viền */
+  background-color: transparent; /* Nền trong suốt để lấy màu từ input-group */
+  height: 50px; /* Chiều cao cố định */
+  line-height: 1.5;
+  width: 100%;
+  color: #333;
+  outline: none;
+}
+
+.chat-input-field:focus {
+  box-shadow: none; /* Bỏ shadow focus mặc định */
+  border-color: transparent; /* Không cần viền khi focus */
+}
+
+.chat-input-field::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
+}
+
+/* Class riêng cho nút gửi chat */
+.chat-send-button {
+  position: absolute;
+  right: 5px; /* Cách lề phải 5px */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px; /* Chiều rộng nút */
+  height: 40px; /* Chiều cao nút */
+  border-radius: 50%; /* Bo tròn nút thành hình tròn */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  padding: 0;
+  margin: 0;
+  background-color: #4a8f7b; /* Màu nền nút */
+  border: none;
+  transition: background-color 0.3s ease;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.chat-send-button:hover {
+  background-color: #3a7a68; /* Màu nền nút khi hover */
+}
+
+.chat-send-button:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* Dark mode adjustments for chat input */
+body.dark-mode .chat-input .input-group {
+  background-color: var(--input-bg);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .chat-input .input-group:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 0.2rem rgba(93, 127, 166, 0.25); /* Hiệu ứng focus dark mode */
+}
+
+body.dark-mode .chat-input-field {
+  color: var(--text-primary);
+}
+
+body.dark-mode .chat-input-field::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+body.dark-mode .chat-send-button {
+  background-color: var(--btn-primary-bg);
+}
+
+body.dark-mode .chat-send-button:hover {
+  background-color: var(--accent-primary);
+}
+
+body.dark-mode .chat-send-button:disabled {
+  background-color: var(--btn-secondary-bg);
+}
+
+/* Chatbot dark mode input styling - Có thể gộp hoặc xóa nếu style trên đã đủ */
+/* .therapy-mode .chat-input .input-group input.form-control { */
+/* ... có thể không cần nữa ... */
+/* } */

@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  # Dịch vụ Spring Boot
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: psychological-webapp
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://fsghackathontal-01-zander.k.aivencloud.com:12629/psychological_treatment?useSSL=true&requireSSL=true&verifyServerCertificate=false
+      - SPRING_DATASOURCE_USERNAME=avnadmin
+      - SPRING_DATASOURCE_PASSWORD=AVNS_dUm1dTIsI455euciU9a
+    volumes:
+      - uploads-data:/app/src/main/resources/static/uploads
+    restart: always
+
+volumes:
+  uploads-data:

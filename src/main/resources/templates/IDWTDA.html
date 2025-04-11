@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Breathing Exercise</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .container {
+        text-align: center;
+        color: white;
+        position: relative;
+      }
+
+      .breathing-circle {
+        width: 150px;
+        height: 150px;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        animation: breathe 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        position: relative;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      }
+
+      @keyframes breathe {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.5);
+        }
+      }
+
+      .circle-text {
+        position: absolute;
+        font-size: 20px;
+        color: white;
+      }
+
+      #inhaleText {
+        animation: inhaleTextAnim 8s infinite;
+      }
+
+      #exhaleText {
+        animation: exhaleTextAnim 8s infinite;
+      }
+
+      @keyframes inhaleTextAnim {
+        0%,
+        100% {
+          opacity: 0;
+          transform: scale(1);
+        }
+        10%,
+        40% {
+          opacity: 1;
+          transform: scale(1.5);
+        }
+        50% {
+          opacity: 0;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes exhaleTextAnim {
+        0%,
+        40% {
+          opacity: 0;
+          transform: scale(1);
+        }
+        50%,
+        90% {
+          opacity: 1;
+          transform: scale(1.5);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1);
+        }
+      }
+
+      .instructions,
+      .encouragement {
+        padding-top: 20px;
+        margin-top: 30px;
+        font-size: 20px;
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .visible {
+        opacity: 1;
+      }
+
+      .volume-controls {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column; /* Sắp xếp theo chiều dọc */
+        align-items: center;
+        gap: 10px; /* Khoảng cách giữa icon và slider */
+      }
+
+      .volume-slider {
+        width: 6px; /* Độ rộng thanh trượt */
+        height: 50px; /* Độ cao của thanh trượt */
+        -webkit-appearance: none;
+        appearance: none;
+        background: white;
+        border-radius: 5px;
+        outline: none;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+        writing-mode: vertical-lr; /* Xoay thanh trượt đúng hướng */
+        direction: rtl; /* Đảo chiều để max ở trên, min ở dưới */
+      }
+
+      .volume-slider:hover {
+        opacity: 1;
+      }
+
+      .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 10px;
+        height: 10px;
+        background: red;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      .speaker-icon {
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+      }
+
+      .speaker-icon:hover {
+        opacity: 1;
+      }
+
+      .muted {
+        opacity: 0.5;
+      }
+
+      .initial-instructions {
+        font-size: 24px;
+        color: white;
+        transition: opacity 1s ease;
+        top: 50%;
+        left: 50%;
+        text-align: center;
+      }
+
+      .ok-button {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        padding: 10px 20px;
+        background-color: rgba(255, 255, 255, 0.2); /* Mờ ban đầu */
+        color: white; /* Màu chữ trắng */
+        font-size: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        border-radius: 25px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s, opacity 0.3s; /* Thêm transition cho opacity */
+        opacity: 0.6; /* Độ mờ ban đầu */
+      }
+
+      .ok-button a {
+        color: white; /* Đổi màu chữ trong thẻ <a> thành trắng để đồng nhất */
+        text-decoration: none;
+      }
+
+      .ok-button:hover {
+        background-color: rgba(
+          255,
+          255,
+          255,
+          1
+        ); /* Trắng hoàn toàn khi hover */
+        opacity: 1; /* Rõ hoàn toàn */
+        transform: scale(1.05); /* Phóng to nhẹ */
+      }
+
+      .ok-button a:hover {
+        color: black; /* Đổi màu chữ trong thẻ <a> thành trắng để đồng nhất */
+        text-decoration: none;
+      }
+
+      .ok-button:active {
+        transform: scale(0.95); /* Thu nhỏ khi nhấn */
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="initial-instructions visible" id="initialInstructions">
+        Hít vào khi vòng tròn lớn dần, thở ra khi vòng tròn thu nhỏ lại.
+      </div>
+      <div class="breathing-mode hidden" id="breathingMode">
+        <div class="breathing-circle" id="breathingCircle">
+          <div class="circle-text" id="inhaleText">Hít vào</div>
+          <div class="circle-text" id="exhaleText">Thở ra</div>
+        </div>
+        <div class="encouragement" id="encouragement"></div>
+      </div>
+    </div>
+
+    <div class="volume-controls">
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.1"
+        value="1"
+        class="volume-slider"
+        id="volumeSlider"
+      />
+      <i class="speaker-icon fas fa-volume-up" id="speakerIcon"></i>
+    </div>
+
+    <audio id="calmMusic" loop>
+      <source src="music/calm-music.mp3" type="audio/mp3" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <script>
+      const breathingMode = document.getElementById("breathingMode");
+      const initialInstructions = document.getElementById(
+        "initialInstructions"
+      );
+      const encouragement = document.getElementById("encouragement");
+      const calmMusic = document.getElementById("calmMusic");
+      const volumeSlider = document.getElementById("volumeSlider");
+      const speakerIcon = document.getElementById("speakerIcon");
+
+      const encouragementMessages = [
+        "Bạn không cô đơn, chúng tôi ở đây vì bạn.",
+        "Rồi mọi thứ sẽ tốt hơn, hãy cho bản thân thời gian nhé.",
+        "Bạn đã làm rất tốt, hãy tiếp tục thở đều.",
+        "Mọi khó khăn đều sẽ qua, bạn mạnh mẽ hơn bạn nghĩ.",
+        "Từng hơi thở là một bước tiến, bạn đang làm tuyệt vời.",
+        "Hãy tin vào bản thân, bạn có sức mạnh để vượt qua tất cả.",
+        "Mỗi ngày là một cơ hội mới, bạn xứng đáng với điều đó.",
+        "Cứ bình tĩnh, mọi thứ rồi sẽ ổn thôi.",
+        "Bạn là ánh sáng trong chính cuộc đời mình, đừng quên điều đó.",
+        "Thở sâu nào, bạn đang dần tìm lại sự bình yên.",
+        "Không sao đâu, bạn không cần phải vội vàng.",
+        "Bạn đã đi được một chặng đường dài, hãy tự hào về mình.",
+        "Mọi cơn bão rồi sẽ tan, nắng ấm sẽ lại đến với bạn.",
+        "Hãy lắng nghe nhịp thở của mình, bạn đang rất kiên cường.",
+        "Bạn là đủ, chỉ cần là chính mình thôi nhé.",
+        "Thời gian sẽ chữa lành, cứ bình tâm và bước tiếp.",
+        "Bạn xứng đáng với sự yên bình, hãy giữ lấy nó.",
+        "Từng phút trôi qua, bạn đang mạnh mẽ hơn đấy.",
+        "Hít vào hy vọng, thở ra lo lắng, bạn làm được mà.",
+        "Hãy mỉm cười với chính mình, bạn thật đáng quý.",
+      ];
+
+      let isBreathingActive = false;
+      let encouragementInterval;
+      let isMuted = false;
+
+      // Hàm làm nhạc to dần
+      function fadeInAudio(audio, duration = 3000) {
+        audio.volume = 0; // Bắt đầu từ âm lượng 0
+        const targetVolume = volumeSlider.value; // Lấy giá trị âm lượng từ slider
+        const step = targetVolume / (duration / 100); // Tính bước tăng âm lượng
+        let currentVolume = 0;
+
+        const fadeInterval = setInterval(() => {
+          if (currentVolume < targetVolume) {
+            currentVolume += step;
+            if (currentVolume > targetVolume) currentVolume = targetVolume; // Không vượt quá target
+            audio.volume = currentVolume;
+          } else {
+            clearInterval(fadeInterval); // Dừng khi đạt âm lượng mong muốn
+          }
+        }, 100);
+      }
+
+      function startBreathingExercise() {
+        initialInstructions.classList.add("visible");
+
+        setTimeout(() => {
+          initialInstructions.style.opacity = "0";
+          setTimeout(() => {
+            initialInstructions.classList.remove("visible");
+            initialInstructions.classList.add("hidden");
+            breathingMode.classList.remove("hidden");
+            isBreathingActive = true;
+
+            try {
+              calmMusic.play().catch((error) => {
+                console.warn("Audio autoplay failed:", error);
+              });
+              fadeInAudio(calmMusic, 3000); // Làm nhạc to dần trong 3 giây
+            } catch (error) {
+              console.error("Audio play error:", error);
+            }
+
+            setTimeout(startEncouragement, 30000);
+          }, 1000);
+        }, 7000);
+      }
+
+      function startEncouragement() {
+        encouragement.classList.add("visible");
+        let messageIndex = 0;
+        encouragement.textContent = encouragementMessages[messageIndex];
+
+        encouragementInterval = setInterval(() => {
+          messageIndex = (messageIndex + 1) % encouragementMessages.length;
+          encouragement.textContent = encouragementMessages[messageIndex];
+        }, 8000);
+      }
+
+      function stopBreathing() {
+        isBreathingActive = false;
+        calmMusic.pause();
+        calmMusic.currentTime = 0;
+        clearInterval(encouragementInterval);
+        breathingMode.classList.add("hidden");
+        initialInstructions.classList.remove("hidden");
+        initialInstructions.style.opacity = "1";
+        encouragement.classList.remove("visible");
+      }
+
+      // Đảm bảo nhạc loop mượt mà
+      calmMusic.addEventListener("timeupdate", () => {
+        const buffer = 0.1; // Thời gian đệm để tránh gián đoạn
+        if (calmMusic.currentTime > calmMusic.duration - buffer) {
+          calmMusic.currentTime = 0; // Quay lại đầu
+          calmMusic.play(); // Tiếp tục phát
+          if (!isMuted) fadeInAudio(calmMusic, 3000); // Làm nhạc to dần khi loop lại
+        }
+      });
+
+      window.addEventListener("load", startBreathingExercise);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && isBreathingActive) {
+          stopBreathing();
+        }
+      });
+
+      // Điều chỉnh âm lượng khi kéo thanh slider
+      volumeSlider.addEventListener("input", (e) => {
+        if (!isMuted) {
+          calmMusic.volume = e.target.value;
+        }
+      });
+
+      // Khi nhấn vào icon loa để tắt/bật âm thanh
+      speakerIcon.addEventListener("click", () => {
+        isMuted = !isMuted;
+        calmMusic.muted = isMuted;
+
+        // Cập nhật icon loa
+        speakerIcon.className = `speaker-icon fas ${
+          isMuted ? "fa-volume-mute" : "fa-volume-up"
+        }`;
+        speakerIcon.classList.toggle("muted", isMuted);
+
+        // Nếu tắt tiếng, thanh volume về 0
+        if (isMuted) {
+          volumeSlider.value = 0;
+        } else {
+          volumeSlider.value = calmMusic.volume; // Khôi phục volume cũ
+          fadeInAudio(calmMusic, 1000); // Làm nhạc to dần khi bật lại
+        }
+      });
+    </script>
+
+    <div class="ok-button" id="okButton">
+      <a href="/home">Tôi đã ổn</a>
+    </div>
+  </body>
+</html>

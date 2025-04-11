@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light">
+      <div
+        id="user-role-data"
+        th:data-user-role="${loggedInUser != null ? loggedInUser.role.roleName : ''}"
+        th:text="${loggedInUser != null ? loggedInUser.role.roleName : ''}"
+        style="display: none; position: absolute"
+      ></div>
+      <div class="container">
+        <a class="navbar-brand" th:href="@{/home}">
+          <img
+            src="https://i.postimg.cc/RFW6cxPr/logo-Full-Stack-GPT.png"
+            alt="Full Stack GPT Logo"
+            class="rounded-circle"
+          />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <!-- Common for ALL -->
+            <li
+              class="nav-item"
+              th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user' or loggedInUser.role.roleName == 'admin'}"
+            >
+              <a class="nav-link fw-bold" th:href="@{/home}">Trang chủ</a>
+            </li>
+            <li
+              class="nav-item"
+              th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user' or loggedInUser.role.roleName == 'admin'}"
+            >
+              <a class="nav-link fw-bold" th:href="@{/articles}">Bài viết</a>
+            </li>
+            <li
+              class="nav-item"
+              th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user' or loggedInUser.role.roleName == 'admin'}"
+            >
+              <a class="nav-link fw-bold" th:href="@{/popular-doctors}"
+                >Bác sĩ nổi bật</a
+              >
+            </li>
+            <li
+              class="nav-item"
+              th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user'}"
+            >
+              <a class="nav-link fw-bold" th:href="@{/chill-mode}">Thư giãn</a>
+            </li>
+
+            <!-- User-only -->
+            <li
+              class="nav-item"
+              th:if="${loggedInUser != null && loggedInUser.role.roleName == 'user'}"
+            >
+              <a class="nav-link fw-bold" th:href="@{/chatbot}">Chatbot</a>
+            </li>
+            <li
+              class="nav-item"
+              th:if="${loggedInUser != null && loggedInUser.role.roleName == 'user'}"
+            >
+              <a class="nav-link fw-bold" href="#" id="chat-doctor-navbar-btn"
+                >Trò chuyện với bác sĩ</a
+              >
+            </li>
+
+            <!-- Admin-only -->
+            <li
+              class="nav-item"
+              th:if="${loggedInUser != null && loggedInUser.role.roleName == 'admin'}"
+            >
+              <a class="nav-link fw-bold" th:href="@{/admin/dashboard}"
+                >Admin dashboard</a
+              >
+            </li>
+
+            <!-- Doctor-only -->
+            <li
+              class="nav-item"
+              th:if="${loggedInUser != null && loggedInUser.role.roleName == 'doctor'}"
+            >
+              <a class="nav-link fw-bold" th:href="@{/doctor/chats}"
+                >Quản lý phiên chat</a
+              >
+            </li>
+          </ul>
+
+          <!-- Theme Toggle Button - Only for User or Guest -->
+          <button
+            id="theme-toggle"
+            class="btn btn-outline-secondary me-2"
+            title="Chuyển đổi chế độ sáng/tối"
+            aria-label="Chuyển đổi chế độ sáng/tối"
+            type="button"
+            th:if="${loggedInUser == null || loggedInUser.role.roleName == 'user'}"
+          >
+            <i class="bi bi-moon-fill"></i>
+          </button>
+
+          <!-- Auth Buttons/Profile Dropdown -->
+          <div th:if="${loggedInUser == null}">
+            <a
+              href="#"
+              class="btn btn-login"
+              data-bs-toggle="modal"
+              data-bs-target="#authModal"
+              >Đăng nhập/Đăng ký</a
+            >
+          </div>
+          <div th:if="${loggedInUser != null}" class="dropdown">
+            <button
+              type="button"
+              class="btn btn-login d-flex align-items-center"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              id="profileDropdown"
+            >
+              <span class="me-1"
+                >Xin chào, <span th:text="${loggedInUser.fullName}"></span
+              ></span>
+              <i class="bi bi-caret-down-fill"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li th:if="${loggedInUser.role.roleName != 'admin'}">
+                <a class="dropdown-item" th:href="@{/profile}"
+                  >Thông tin cá nhân</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" th:href="@{/logout}">Đăng xuất</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+      document.addEventListener("DOMContentLoaded", function () {
+        const userRole =
+          /*[[${loggedInUser != null ? loggedInUser.role.roleName : 'not-logged-in'}]]*/ null;
+        console.log("Current user role from Thymeleaf:", userRole);
+
+        const userRoleElement = document.getElementById("user-role-data");
+        if (userRoleElement) {
+          console.log(
+            "User role from data attribute:",
+            userRoleElement.getAttribute("data-user-role")
+          );
+        } else {
+          console.error("User role element not found in DOM");
+        }
+      });
+    </script>
+
+    <!-- Script đảm bảo áp dụng theme light cho admin và bác sĩ -->
+    <script
+      th:if="${loggedInUser != null && (loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor')}"
+    >
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Admin/Doctor detected, enforcing light theme");
+        // Luôn áp dụng theme sáng cho admin và bác sĩ
+        document.body.classList.remove("dark-mode");
+        document.documentElement.classList.remove("dark-mode");
+        localStorage.setItem("theme", "light");
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const loginError = /*[[${loginError}]]*/ null;
+        const registerError = /*[[${registerError}]]*/ null;
+        const registerSuccess = /*[[${registerSuccess}]]*/ null;
+        if (loginError || registerError || registerSuccess) {
+          const modal = new bootstrap.Modal(
+            document.getElementById("authModal")
+          );
+          modal.show();
+          if (registerError || registerSuccess) {
+            const registerTab = new bootstrap.Tab(
+              document.querySelector("#register-tab")
+            );
+            registerTab.show();
+          }
+        }
+        document
+          .querySelector(".switch-to-register")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            const registerTab = new bootstrap.Tab(
+              document.querySelector("#register-tab")
+            );
+            registerTab.show();
+          });
+        document
+          .querySelector(".switch-to-login")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            const loginTab = new bootstrap.Tab(
+              document.querySelector("#login-tab")
+            );
+            loginTab.show();
+          });
+      });
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9257c0a94f86bf7f',t:'MTc0MjgzNTkxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

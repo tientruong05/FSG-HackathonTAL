@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack GPT - Hành trình chữa lành</title>
+
+    <!-- Thêm theme fragment trước các CSS khác -->
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+  </head>
+  <body>
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <!-- Toast notifications -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+      <div
+        th:if="${chatError}"
+        class="toast show"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        data-bs-delay="5000"
+      >
+        <div class="toast-header bg-danger text-white">
+          <strong class="me-auto">Thông báo</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="toast-body" th:text="${chatError}"></div>
+      </div>
+    </div>
+
+    <!-- Doctor Modal -->
+    <th:block
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></th:block>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container hero-content">
+        <h1 class="hero-title">Hành trình chữa lành cùng<br />Nắng Tâm Hồn</h1>
+        <p class="hero-subtitle">
+          Đồng hành cùng bạn trên con đường tìm lại sự cân bằng và bình yên
+          trong tâm hồn
+        </p>
+        <a th:href="@{#cta-section}" class="btn btn-primary"
+          >Bắt đầu hành trình</a
+        >
+      </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="content-section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6 content-text">
+            <h2 class="section-title">Sứ mệnh của chúng tôi</h2>
+            <p class="fs-5">
+              Cung cấp một không gian an toàn, nơi bạn có thể chia sẻ, lắng nghe
+              và tìm thấy sự đồng cảm trong hành trình chữa lành cảm xúc.
+            </p>
+          </div>
+          <div class="col-md-6">
+            <img
+              src="https://i.postimg.cc/wB6jkYjf/image-1.png"
+              alt="Sứ mệnh của chúng tôi"
+              class="img-fluid"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Not Alone Section -->
+    <section class="content-section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6 order-md-2 content-text">
+            <h2 class="section-title">Bạn không cô đơn</h2>
+            <p class="fs-5">
+              Mỗi người đều có những khó khăn riêng, và chúng tôi ở đây để đồng
+              hành cùng bạn trên con đường tìm lại sự cân bằng và bình yên trong
+              tâm hồn.
+            </p>
+          </div>
+          <div class="col-md-6 order-md-1">
+            <img
+              src="https://i.postimg.cc/4yhf3JWd/image-2.jpg"
+              alt="Bạn không cô đơn"
+              class="img-fluid"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Therapy Section -->
+    <section class="content-section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6 content-text">
+            <h2 class="section-title">Liệu pháp phù hợp cho bạn</h2>
+            <p class="fs-5">
+              Từ tư vấn trực tiếp đến các bài viết chuyên sâu về sức khỏe tâm
+              lý, chatbot tâm lý 24/7 và những bài viết phương pháp giúp bạn
+              vượt qua căng thẳng, lo âu, và trầm cảm.
+            </p>
+          </div>
+          <div class="col-md-6">
+            <img
+              src="https://i.postimg.cc/t7QXZLcz/image-3.jpg"
+              alt="Liệu pháp phù hợp cho bạn"
+              class="img-fluid"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="cta-section" class="cta-section">
+      <div class="container">
+        <h2 class="cta-title">Bắt đầu hành trình chữa lành</h2>
+        <p class="cta-subtitle">
+          Chúng tôi cung cấp nhiều cách khác nhau để hỗ trợ bạn trên hành trình
+          chữa lành
+        </p>
+
+        <!-- Hiển thị phiên chat đang hoạt động (nếu có) -->
+        <div
+          class="row justify-content-center mb-4"
+          th:if="${loggedInUser != null && activeChatSession != null}"
+        >
+          <div class="col-md-8 col-lg-6">
+            <div class="card border-success">
+              <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Phiên trò chuyện đang diễn ra</h5>
+              </div>
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <img
+                    th:src="${activeDoctor.image}"
+                    alt="Doctor"
+                    class="me-3"
+                    style="
+                      width: 60px;
+                      height: 60px;
+                      object-fit: cover;
+                      border-radius: 50%;
+                    "
+                  />
+                  <div>
+                    <h6
+                      class="mb-1"
+                      th:text="'Bác sĩ: ' + ${activeDoctor.fullName}"
+                    ></h6>
+                    <p
+                      class="small text-muted mb-2"
+                      th:text="'Bắt đầu lúc: ' + ${#temporals.format(activeChatSession.startTime, 'dd/MM/yyyy HH:mm')}"
+                    ></p>
+                    <a
+                      th:href="@{/chat/{id}(id=${activeDoctor.userId})}"
+                      class="btn btn-success btn-sm"
+                      >Tiếp tục trò chuyện</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-cards-container">
+          <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-3 mb-4">
+              <div class="service-card">
+                <div class="service-icon">
+                  <i class="bi bi-chat-dots"></i>
+                </div>
+                <h4>Trò chuyện với các chuyên gia</h4>
+                <p>
+                  Kết nối trực tiếp với các chuyên gia tâm lý được đào tạo
+                  chuyên sâu
+                </p>
+                <a
+                  th:if="${loggedInUser != null}"
+                  href="#"
+                  class="btn btn-service"
+                  th:classappend="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? 'disabled' : ''"
+                  th:attr="data-bs-toggle=${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? null : 'modal', data-bs-target=${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? null : '#doctorSelectionModal'"
+                  th:aria-disabled="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'}"
+                  >Bắt đầu trò chuyện</a
+                >
+                <a
+                  th:if="${loggedInUser == null}"
+                  href="#"
+                  class="btn btn-service"
+                  data-bs-toggle="modal"
+                  data-bs-target="#authModal"
+                  >Đăng nhập để trò chuyện</a
+                >
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3 mb-4">
+              <div class="service-card">
+                <div class="service-icon">
+                  <i class="bi bi-robot"></i>
+                </div>
+                <h4>Chatbot Tâm lý</h4>
+                <p>Trò chuyện 24/7 với trợ lý AI được đào tạo về tâm lý học</p>
+                <a
+                  th:if="${loggedInUser != null}"
+                  th:href="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? '#' : '/chatbot'"
+                  class="btn btn-service"
+                  th:classappend="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? 'disabled' : ''"
+                  th:aria-disabled="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'}"
+                  >Chat ngay</a
+                >
+                <a
+                  th:if="${loggedInUser == null}"
+                  href="#"
+                  class="btn btn-service"
+                  data-bs-toggle="modal"
+                  data-bs-target="#authModal"
+                  >Đăng nhập để trò chuyện</a
+                >
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3 mb-4">
+              <div class="service-card">
+                <div class="service-icon">
+                  <i class="bi bi-journal-text"></i>
+                </div>
+                <h4>Đọc bài viết tài liệu</h4>
+                <p>Khám phá thông tin hữu ích về sức khỏe tâm lý</p>
+                <a href="/articles" class="btn btn-service">Đọc ngay</a>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3 mb-4">
+              <div class="service-card special-feature">
+                <h4 style="font-weight: 700">
+                  Tôi không muốn làm gì cả, hãy thư giãn
+                </h4>
+                <p>
+                  Đôi khi, việc không làm gì cũng là một lựa chọn. Hãy cho phép
+                  bản thân được nghỉ ngơi.
+                </p>
+                <a
+                  th:href="${loggedInUser != null && (loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor')} ? '#' : '/chill-mode'"
+                  class="btn btn-rest"
+                  th:classappend="${loggedInUser != null && (loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor')} ? 'disabled' : ''"
+                  th:aria-disabled="${loggedInUser != null && (loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor')}"
+                  >Chỉ cần ở đây</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Auth Modal -->
+    <th:block th:replace="~{fragments/auth-modal :: authModal}"></th:block>
+
+    <!-- Back to Top Button -->
+    <th:block th:replace="~{fragments/back-to-top :: backToTop}"></th:block>
+
+    <!-- Footer -->
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script for Auth Modal Tabs (Keep this if needed) -->
+    <script th:inline="javascript">
+      document.addEventListener("DOMContentLoaded", function () {
+        // Đảm bảo tất cả Dropdowns được khởi tạo đúng cách
+        const dropdownElementList =
+          document.querySelectorAll(".dropdown-toggle");
+        const dropdownList = [...dropdownElementList].map(
+          (dropdownToggleEl) => new bootstrap.Dropdown(dropdownToggleEl)
+        );
+
+        // Initialize toasts
+        const toastElList = document.querySelectorAll(".toast");
+        const toastList = [...toastElList].map(
+          (toastEl) =>
+            new bootstrap.Toast(toastEl, {
+              autohide: true,
+              delay: 5000,
+            })
+        );
+
+        // Show auth modal if there are errors or success messages
+        const loginError = /*[[${loginError}]]*/ null;
+        const registerError = /*[[${registerError}]]*/ null;
+        const registerSuccess = /*[[${registerSuccess}]]*/ null;
+        if (loginError || registerError || registerSuccess) {
+          const modal = new bootstrap.Modal(
+            document.getElementById("authModal")
+          );
+          modal.show();
+          if (registerError || registerSuccess) {
+            const registerTab = new bootstrap.Tab(
+              document.querySelector("#register-tab")
+            );
+            registerTab.show();
+          }
+        }
+        document
+          .querySelector(".switch-to-register")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            const registerTab = new bootstrap.Tab(
+              document.querySelector("#register-tab")
+            );
+            registerTab.show();
+          });
+        document
+          .querySelector(".switch-to-login")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            const loginTab = new bootstrap.Tab(
+              document.querySelector("#login-tab")
+            );
+            loginTab.show();
+          });
+      });
+    </script>
+
+    <!-- NEW SCRIPT for Doctor Modal -->
+    <script>
+      window.openDoctorModal = function () {
+        console.log("Opening doctor modal with global function");
+        const modalElement = document.getElementById("doctorSelectionModal");
+        if (modalElement) {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+          const loadingIndicator =
+            document.getElementById("doctorModalLoading");
+          const contentArea = document.getElementById("doctorModalBodyContent");
+
+          if (!loadingIndicator || !contentArea) {
+            console.error("Modal loading or content area not found!");
+            return;
+          }
+
+          // Show loading indicator and hide content
+          loadingIndicator.style.display = "block";
+          contentArea.style.display = "none";
+
+          // Show the modal shell immediately while loading
+          modal.show();
+
+          // Fetch updated content
+          fetch("/doctor-selection-content?_=" + new Date().getTime(), {
+            // Add cache buster
+            method: "GET",
+            headers: {
+              Accept: "text/html", // Expecting HTML fragment
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "Network response was not ok: " + response.statusText
+                );
+              }
+              return response.text();
+            })
+            .then((html) => {
+              // Replace the content area's innerHTML with the fetched fragment
+              contentArea.innerHTML = html;
+              // Hide loading and show content
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+              console.log("Modal content updated.");
+            })
+            .catch((error) => {
+              console.error("Error fetching or updating modal content:", error);
+              // Display an error message within the modal
+              contentArea.innerHTML =
+                '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách bác sĩ. Vui lòng thử lại sau.</div>';
+              loadingIndicator.style.display = "none";
+              contentArea.style.display = "block";
+            });
+        } else {
+          console.error("Doctor selection modal element not found");
+          alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+        }
+      };
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const chatButton = document.querySelector("#chat-doctor-navbar-btn");
+        const modalElement = document.getElementById("doctorSelectionModal");
+
+        if (chatButton && modalElement) {
+          chatButton.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent default anchor behavior
+            console.log("Chat doctor navbar button clicked");
+            openDoctorModal();
+          });
+
+          // Optional: Add event listener to clear content or reset state when modal is hidden
+          modalElement.addEventListener("hidden.bs.modal", function (event) {
+            // Reset state if needed when modal closes
+            // if(contentArea) contentArea.innerHTML = ''; // Optional: Clear content
+            // if(loadingIndicator) loadingIndicator.style.display = 'none';
+          });
+        } else {
+          if (!chatButton)
+            console.error(
+              "Element with ID 'chat-doctor-navbar-btn' not found."
+            );
+          if (!modalElement)
+            console.error("Element with ID 'doctorSelectionModal' not found.");
+        }
+      });
+    </script>
+    <!-- End NEW SCRIPT -->
+
+    <!-- Bootstrap JS đã được tải trong navbar fragment -->
+
+    <!-- Script để kích hoạt hiệu ứng animation -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Thêm class cho các phần tử cần animation khi scroll
+        const elementsToAnimate = document.querySelectorAll(
+          ".content-section, .service-card, .section-title, .hero-content, .cta-title, .cta-subtitle"
+        );
+        elementsToAnimate.forEach((element) => {
+          element.classList.add("animate-on-scroll");
+        });
+
+        // Thêm hiệu ứng ripple cho các nút
+        const buttons = document.querySelectorAll(
+          ".btn-primary, .btn-service, .btn-login, .btn-service-alt, .btn-rest"
+        );
+        buttons.forEach((button) => {
+          button.classList.add("btn-ripple");
+        });
+
+        // Thêm hiệu ứng hover zoom cho ảnh
+        const images = document.querySelectorAll(".content-section img");
+        images.forEach((img) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "img-hover-zoom";
+          img.parentNode.insertBefore(wrapper, img);
+          wrapper.appendChild(img);
+        });
+
+        // Hiệu ứng khi scroll
+        function checkScroll() {
+          const elements = document.querySelectorAll(".animate-on-scroll");
+          const windowHeight = window.innerHeight;
+
+          elements.forEach((element) => {
+            const elementPosition = element.getBoundingClientRect().top;
+            if (elementPosition < windowHeight * 0.85) {
+              element.classList.add("visible");
+            }
+          });
+
+          // Hiệu ứng navbar khi scroll
+          const navbar = document.querySelector(".navbar");
+          if (window.scrollY > 100) {
+            navbar.classList.add("navbar-scrolled");
+          } else {
+            navbar.classList.remove("navbar-scrolled");
+          }
+        }
+
+        // Gọi hàm khi scroll
+        window.addEventListener("scroll", checkScroll);
+
+        // Khởi tạo lần đầu
+        checkScroll();
+
+        // Khởi tạo dropdown menu
+        const dropdownElementList =
+          document.querySelectorAll(".dropdown-toggle");
+        if (dropdownElementList.length > 0) {
+          const dropdownList = [...dropdownElementList].map(
+            (dropdownToggleEl) => new bootstrap.Dropdown(dropdownToggleEl)
+          );
+          console.log("Dropdown menus initialized:", dropdownList.length);
+        }
+
+        // Kiểm tra role người dùng và áp dụng theme phù hợp
+        const userRoleElement = document.getElementById("user-role-data");
+        if (userRoleElement) {
+          const userRole = userRoleElement.getAttribute("data-user-role");
+          console.log("Home page: Checking user role for theme:", userRole);
+
+          if (userRole === "admin" || userRole === "doctor") {
+            console.log(
+              "Home page: Admin/Doctor role detected, forcing light theme"
+            );
+            document.body.classList.remove("dark-mode");
+            document.documentElement.classList.remove("dark-mode");
+            localStorage.setItem("theme", "light");
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

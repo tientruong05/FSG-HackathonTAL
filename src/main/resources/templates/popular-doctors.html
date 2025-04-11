@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:class="${loggedInUser != null && loggedInUser.role.roleName == 'user'} ? 'therapy-mode' : ''"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bác sĩ nổi bật - FullStackGPT</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/style2.css}" />
+    <!-- Thêm therapy theme fragment -->
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+    <style>
+      :root {
+        --primary-color: #4a8f7b;
+        --secondary-color: #e6e6e6;
+        --accent-color: #ff6b6b;
+        --text-color: #333;
+        --light-color: #fff;
+        --dark-color: #212529;
+        --border-radius: 15px;
+        --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --card-hover-transform: translateY(-10px);
+        --transition-speed: 0.4s;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        line-height: 1.6;
+        background-color: #f9fafb;
+      }
+
+      /* Hero Section Styling */
+      .hero-section {
+        background: linear-gradient(135deg, #4a8f7b 0%, #36735e 100%);
+        color: var(--light-color);
+        text-align: center;
+        padding: 100px 0 120px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: -50px;
+      }
+
+      .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.2;
+        mix-blend-mode: overlay;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        animation: fadeInUp 1s ease-out;
+      }
+
+      .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 30px;
+        max-width: 850px;
+        margin-left: auto;
+        margin-right: auto;
+        opacity: 0.9;
+        line-height: 1.7;
+        animation: fadeInUp 1s ease-out;
+      }
+
+      /* Doctors Section Styling */
+      .doctors-section {
+        padding: 80px 0;
+        background-color: #f9fafb;
+        position: relative;
+      }
+
+      /* Dark mode adjustments */
+      body.dark-mode .doctors-section {
+        background-color: var(--bg-primary);
+      }
+
+      body.dark-mode .doctor-card-page {
+        background-color: var(--bg-secondary);
+      }
+
+      body.dark-mode .doctor-name {
+        color: var(--text-primary);
+      }
+
+      body.dark-mode .doctor-details {
+        color: var(--text-secondary);
+      }
+
+      body.dark-mode .doctor-specialty {
+        color: var(--accent-primary);
+        border-top-color: var(--border-color);
+      }
+
+      body.dark-mode .empty-state {
+        background-color: var(--bg-secondary);
+      }
+
+      body.dark-mode .empty-state-title {
+        color: var(--text-primary);
+      }
+
+      body.dark-mode .empty-state-text {
+        color: var(--text-secondary);
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        position: relative;
+      }
+
+      .section-title::after {
+        content: "";
+        display: block;
+        width: 80px;
+        height: 4px;
+        background: var(--primary-color);
+        margin: 15px auto 0;
+        border-radius: 2px;
+      }
+
+      .section-subtitle {
+        text-align: center;
+        max-width: 700px;
+        margin: -30px auto 50px;
+        color: #777;
+        font-size: 1.1rem;
+      }
+
+      /* Modern Doctor Card */
+      .doctor-card-page {
+        background-color: var(--light-color);
+        border-radius: var(--border-radius);
+        padding: 0;
+        height: 100%;
+        box-shadow: var(--box-shadow);
+        transition: transform var(--transition-speed) ease,
+          box-shadow var(--transition-speed) ease;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .doctor-card-page:hover {
+        transform: var(--card-hover-transform);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .doctor-image-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .doctor-image-page {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--transition-speed);
+      }
+
+      .doctor-card-page:hover .doctor-image-page {
+        transform: scale(1.05);
+      }
+
+      .doctor-status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .status-online {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .status-offline {
+        background-color: #9e9e9e;
+        color: white;
+      }
+
+      .doctor-info {
+        padding: 25px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .doctor-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: var(--dark-color);
+      }
+
+      .doctor-details {
+        margin-bottom: 10px;
+        font-size: 1rem;
+        color: #666;
+        display: flex;
+        align-items: center;
+      }
+
+      .doctor-details i {
+        margin-right: 10px;
+        color: var(--primary-color);
+        width: 20px;
+        text-align: center;
+      }
+
+      .doctor-specialty {
+        margin-top: auto;
+        padding: 6px 0;
+        font-size: 0.9rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        border-top: 1px solid #eee;
+        margin-bottom: 15px;
+      }
+
+      .doctor-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: auto;
+      }
+
+      .btn-chat {
+        flex-grow: 1;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 30px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-align: center;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-chat:hover {
+        background-color: #3a7a68;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(74, 143, 123, 0.4);
+      }
+
+      .btn-chat i {
+        font-size: 1.1rem;
+      }
+
+      /* Animations */
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-card {
+        animation: fadeInUp 0.6s both;
+      }
+
+      /* Empty state styling */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        max-width: 600px;
+        margin: 50px auto;
+      }
+
+      .empty-state-icon {
+        font-size: 5rem;
+        color: #ddd;
+        margin-bottom: 20px;
+      }
+
+      .empty-state-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #555;
+      }
+
+      .empty-state-text {
+        color: #777;
+        margin-bottom: 25px;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+          font-size: 1.1rem;
+        }
+
+        .section-title {
+          font-size: 2rem;
+        }
+
+        .doctor-image-container {
+          height: 200px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .hero-section {
+          padding: 80px 0 100px;
+        }
+
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .doctors-section {
+          padding: 60px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Auth modal -->
+    <div th:replace="~{fragments/auth-modal :: authModal}"></div>
+
+    <!-- Doctor selection modal if needed -->
+    <div
+      th:if="${loggedInUser != null && loggedInUser.role.roleName == 'user'}"
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="container hero-content">
+        <h1 class="hero-title">
+          Đội ngũ bác sĩ tâm lý chuyên nghiệp, giàu kinh nghiệm
+        </h1>
+        <p class="hero-subtitle">
+          Gặp gỡ các chuyên gia tâm lý hàng đầu của chúng tôi, những người luôn
+          sẵn sàng hỗ trợ và đồng hành cùng bạn trên hành trình chăm sóc sức
+          khỏe tinh thần. Với kinh nghiệm và sự thấu hiểu, các bác sĩ của chúng
+          tôi cam kết mang đến các giải pháp tốt nhất cho bạn.
+        </p>
+      </div>
+    </section>
+
+    <section class="doctors-section">
+      <div class="container">
+        <!-- Doctors list -->
+        <div
+          th:if="${doctors != null && !doctors.isEmpty()}"
+          class="row row-cols-1 row-cols-md-3 g-4 mt-4"
+        >
+          <div
+            th:each="doctor, status : ${doctors}"
+            class="col animate-card"
+            th:style="'animation-delay: ' + ${status.index * 0.1} + 's'"
+          >
+            <div class="doctor-card-page">
+              <div class="doctor-image-container">
+                <img
+                  th:src="${doctor.image}"
+                  class="doctor-image-page"
+                  alt="Doctor image"
+                />
+                <div
+                  class="doctor-status-badge"
+                  th:classappend="${doctor.isOnline ? 'status-online' : 'status-offline'}"
+                >
+                  <i class="fas fa-circle me-1" style="font-size: 0.6rem"></i>
+                  <span
+                    th:text="${doctor.isOnline ? 'Đang trực tuyến' : 'Ngoại tuyến'}"
+                  ></span>
+                </div>
+              </div>
+
+              <div class="doctor-info">
+                <h5 class="doctor-name" th:text="${doctor.fullName}">
+                  Tên bác sĩ
+                </h5>
+
+                <div class="doctor-details" th:if="${doctor.phone != null}">
+                  <i class="fas fa-phone"></i>
+                  <span th:text="${doctor.phone}">Số điện thoại</span>
+                </div>
+
+                <div class="doctor-details">
+                  <i class="fas fa-envelope"></i>
+                  <span th:text="${doctor.email}">Email</span>
+                </div>
+
+                <div class="doctor-specialty">
+                  <span>Bác sĩ tâm lý lâm sàng</span>
+                </div>
+
+                <div class="doctor-actions">
+                  <!-- Show chat button only for logged in users -->
+                  <a
+                    th:if="${loggedInUser != null && loggedInUser.role.roleName == 'user'}"
+                    th:href="@{/chat/{id}(id=${doctor.userId})}"
+                    class="btn btn-chat"
+                  >
+                    <i class="fas fa-comments"></i> Trò chuyện ngay
+                  </a>
+
+                  <!-- Show login prompt for non-logged in users -->
+                  <a
+                    th:if="${loggedInUser == null}"
+                    href="#"
+                    data-bs-toggle="modal"
+                    data-bs-target="#authModal"
+                    class="btn btn-chat"
+                  >
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập để trò chuyện
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No doctors found -->
+        <div
+          th:if="${doctors == null || doctors.isEmpty()}"
+          class="empty-state"
+        >
+          <i class="fas fa-user-md empty-state-icon"></i>
+          <h4 class="empty-state-title">Không tìm thấy bác sĩ nào</h4>
+          <p class="empty-state-text">
+            Hiện tại chưa có bác sĩ nào trong hệ thống. Vui lòng quay lại sau.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript cho doctor modal -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Animation cho cards
+        const animateCards = document.querySelectorAll(".animate-card");
+
+        // Hiệu ứng hiển thị từng card
+        animateCards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Định nghĩa hàm openDoctorModal toàn cục
+        window.openDoctorModal = function () {
+          console.log("Opening doctor modal with global function");
+          const modalElement = document.getElementById("doctorSelectionModal");
+          if (modalElement) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            const loadingIndicator =
+              document.getElementById("doctorModalLoading");
+            const contentArea = document.getElementById(
+              "doctorModalBodyContent"
+            );
+
+            if (!loadingIndicator || !contentArea) {
+              console.error("Modal loading or content area not found!");
+              return;
+            }
+
+            // Show loading indicator and hide content
+            loadingIndicator.style.display = "block";
+            contentArea.style.display = "none";
+
+            // Show the modal shell immediately while loading
+            modal.show();
+
+            // Fetch updated content
+            fetch("/doctor-selection-content?_=" + new Date().getTime(), {
+              method: "GET",
+              headers: {
+                Accept: "text/html", // Expecting HTML fragment
+              },
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(
+                    "Network response was not ok: " + response.statusText
+                  );
+                }
+                return response.text();
+              })
+              .then((html) => {
+                // Replace the content area's innerHTML with the fetched fragment
+                contentArea.innerHTML = html;
+                // Hide loading and show content
+                loadingIndicator.style.display = "none";
+                contentArea.style.display = "block";
+                console.log("Modal content updated.");
+              })
+              .catch((error) => {
+                console.error(
+                  "Error fetching or updating modal content:",
+                  error
+                );
+                // Display an error message within the modal
+                contentArea.innerHTML =
+                  '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách bác sĩ. Vui lòng thử lại sau.</div>';
+                loadingIndicator.style.display = "none";
+                contentArea.style.display = "block";
+              });
+          } else {
+            console.error("Doctor selection modal element not found");
+            alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+          }
+        };
+
+        // Chỉ lắng nghe nút chung trong navbar
+        const chatButton = document.querySelector("#chat-doctor-navbar-btn");
+        if (chatButton) {
+          chatButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            console.log("Opening doctor modal from navbar button");
+            if (typeof openDoctorModal === "function") {
+              openDoctorModal();
+            } else {
+              console.error("openDoctorModal function not found");
+              alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

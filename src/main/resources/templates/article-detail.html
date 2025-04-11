@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${article.title} + ' - Full Stack GPT'">
+      Chi tiết bài viết - Full Stack GPT
+    </title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Custom CSS -->
+    <style>
+      :root {
+        --primary-color: #4a8f7b;
+        --secondary-color: #e6e6e6;
+        --text-color: #333;
+        --light-color: #fff;
+        --dark-color: #212529;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      .article-detail-section {
+        padding: 80px 0;
+        background-color: var(--light-color);
+      }
+
+      .article-detail-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 2.8rem;
+        margin-bottom: 25px;
+        position: relative;
+        display: inline-block;
+      }
+
+      .article-detail-title::after {
+        content: "";
+        position: absolute;
+        width: 50%;
+        height: 3px;
+        background-color: var(--primary-color);
+        bottom: -10px;
+        left: 0;
+        opacity: 0.7;
+      }
+
+      .article-detail-meta {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 30px;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .article-detail-content img {
+        border-radius: 12px;
+        max-width: 100%;
+        height: auto;
+        margin: 25px 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.5s ease;
+      }
+
+      .article-detail-content img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .article-detail-content p {
+        font-size: 1.15rem;
+        margin-bottom: 20px;
+        line-height: 1.8;
+        color: #444;
+      }
+
+      .btn-contact {
+        background-color: var(--primary-color);
+        color: var(--light-color);
+        border-radius: 30px;
+        padding: 12px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(74, 143, 123, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-contact::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: -100%;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0) 50%
+        );
+        transition: all 0.3s ease;
+      }
+
+      .btn-contact:hover {
+        background-color: #3a7a68;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(74, 143, 123, 0.4);
+      }
+
+      .btn-contact:hover::after {
+        left: 100%;
+      }
+
+      @media (max-width: 768px) {
+        .article-detail-title {
+          font-size: 2.2rem;
+        }
+        .article-detail-content {
+          padding: 0 15px;
+        }
+      }
+
+      .related-articles {
+        margin-top: 60px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .related-articles h3 {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 30px;
+        position: relative;
+        display: inline-block;
+      }
+
+      .related-articles h3::after {
+        content: "";
+        position: absolute;
+        width: 40px;
+        height: 3px;
+        background-color: var(--primary-color);
+        bottom: -10px;
+        left: 0;
+      }
+
+      .related-card {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.4s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        overflow: hidden;
+      }
+
+      .related-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        border-color: rgba(74, 143, 123, 0.2);
+      }
+
+      .related-card img {
+        border-radius: 8px;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        margin-bottom: 15px;
+        transition: all 0.5s ease;
+      }
+
+      .related-card:hover img {
+        transform: scale(1.05);
+      }
+
+      .related-card h5 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #4a8f7b;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex-grow: 1;
+        transition: color 0.3s ease;
+      }
+
+      .related-card:hover h5 {
+        color: #3a7a68;
+      }
+
+      .btn-article {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 30px;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        text-align: center;
+        display: block;
+        width: 100%;
+        margin-top: auto;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(74, 143, 123, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-article::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        transform: skewX(-15deg);
+      }
+
+      .btn-article:hover {
+        background-color: #3a7a68;
+        color: white;
+        font-weight: bold;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(74, 143, 123, 0.3);
+      }
+
+      .btn-article:hover::after {
+        width: 120%;
+      }
+
+      .article-container {
+        position: relative;
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+      }
+
+      .article-body {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .meta-icon {
+        color: var(--primary-color);
+        margin-right: 5px;
+      }
+
+      .animate-fade-up {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 0.6s ease forwards;
+      }
+
+      @keyframes fadeUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-delay-1 {
+        animation-delay: 0.2s;
+      }
+
+      .animate-delay-2 {
+        animation-delay: 0.4s;
+      }
+
+      .animate-delay-3 {
+        animation-delay: 0.6s;
+      }
+    </style>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/style2.css}" rel="stylesheet" />
+    <!-- Thêm therapy theme fragment -->
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+  </head>
+  <body>
+    <!-- Include Navbar Fragment -->
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <th:block
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></th:block>
+
+    <!-- Article Detail Section -->
+    <section class="article-detail-section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-10">
+            <div class="article-container animate-fade-up">
+              <div class="article-body">
+                <h1
+                  class="article-detail-title"
+                  th:text="${article.title}"
+                ></h1>
+                <div class="article-detail-meta">
+                  <span
+                    ><i class="bi bi-calendar-date meta-icon"></i> Đăng ngày:
+                    <span
+                      th:text="${#temporals.format(article.createdAt, 'dd/MM/yyyy')}"
+                    ></span>
+                  </span>
+                  <!-- <span class="ms-3"
+                    ><i class="bi bi-person meta-icon"></i> Tác giả:
+                    <span
+                      th:text="${article.admin != null ? article.admin.fullName : 'Dr. Nguyễn Văn A'}"
+                    ></span>
+                  </span> -->
+                  <span class="ms-3"
+                    ><i class="bi bi-eye meta-icon"></i> Lượt xem:
+                    <span th:text="${article.views}"></span
+                  ></span>
+                </div>
+
+                <div
+                  class="article-detail-content animate-fade-up animate-delay-1"
+                >
+                  <img
+                    th:src="${article.image}"
+                    th:alt="${article.title}"
+                    class="img-fluid"
+                  />
+                  <div th:utext="${article.content}"></div>
+                </div>
+
+                <!-- Các bài viết khác ngẫu nhiên -->
+                <div class="related-articles animate-fade-up animate-delay-3">
+                  <h3>Các bài viết khác</h3>
+                  <div class="row g-4">
+                    <div class="col-md-4" th:each="related : ${randomArticles}">
+                      <div class="related-card">
+                        <img
+                          th:src="${related.image}"
+                          th:alt="${related.title}"
+                        />
+                        <h5
+                          class="related-title"
+                          th:text="${related.title}"
+                        ></h5>
+                        <a
+                          th:href="@{/articles/{id}(id=${related.articleId})}"
+                          class="btn btn-article"
+                          >Đọc bài <i class="bi bi-arrow-right"></i
+                        ></a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <th:block th:replace="~{fragments/auth-modal :: authModal}"></th:block>
+
+    <!-- Back to Top Button -->
+    <th:block th:replace="~{fragments/back-to-top :: backToTop}"></th:block>
+
+    <!-- Include Footer Fragment -->
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript cho doctor modal -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Thêm hiệu ứng cho ảnh
+        const articleImages = document.querySelectorAll(
+          ".article-detail-content img"
+        );
+        articleImages.forEach((img) => {
+          img.classList.add("img-fluid");
+
+          // Thêm lightbox khi click vào ảnh
+          img.addEventListener("click", function () {
+            this.classList.toggle("expanded");
+          });
+        });
+
+        // Định nghĩa hàm openDoctorModal toàn cục
+        window.openDoctorModal = function () {
+          console.log("Opening doctor modal with global function");
+          const modalElement = document.getElementById("doctorSelectionModal");
+          if (modalElement) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            const loadingIndicator =
+              document.getElementById("doctorModalLoading");
+            const contentArea = document.getElementById(
+              "doctorModalBodyContent"
+            );
+
+            if (!loadingIndicator || !contentArea) {
+              console.error("Modal loading or content area not found!");
+              return;
+            }
+
+            // Show loading indicator and hide content
+            loadingIndicator.style.display = "block";
+            contentArea.style.display = "none";
+
+            // Show the modal shell immediately while loading
+            modal.show();
+
+            // Fetch updated content
+            fetch("/doctor-selection-content?_=" + new Date().getTime(), {
+              method: "GET",
+              headers: {
+                Accept: "text/html", // Expecting HTML fragment
+              },
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(
+                    "Network response was not ok: " + response.statusText
+                  );
+                }
+                return response.text();
+              })
+              .then((html) => {
+                // Replace the content area's innerHTML with the fetched fragment
+                contentArea.innerHTML = html;
+                // Hide loading and show content
+                loadingIndicator.style.display = "none";
+                contentArea.style.display = "block";
+                console.log("Modal content updated.");
+              })
+              .catch((error) => {
+                console.error(
+                  "Error fetching or updating modal content:",
+                  error
+                );
+                // Display an error message within the modal
+                contentArea.innerHTML =
+                  '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách bác sĩ. Vui lòng thử lại sau.</div>';
+                loadingIndicator.style.display = "none";
+                contentArea.style.display = "block";
+              });
+          } else {
+            console.error("Doctor selection modal element not found");
+            alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+          }
+        };
+
+        // Lắng nghe nút "Chat với bác sĩ" trong navbar
+        const chatButton = document.querySelector("#chat-doctor-navbar-btn");
+        if (chatButton) {
+          chatButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            console.log("Opening doctor modal from navbar button");
+            if (typeof openDoctorModal === "function") {
+              openDoctorModal();
+            } else {
+              console.error("openDoctorModal function not found");
+              alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+            }
+          });
+        }
+
+        // Hiệu ứng navbar khi scroll
+        function checkScroll() {
+          const navbar = document.querySelector(".navbar");
+          if (window.scrollY > 100) {
+            navbar.classList.add("navbar-scrolled");
+          } else {
+            navbar.classList.remove("navbar-scrolled");
+          }
+        }
+
+        window.addEventListener("scroll", checkScroll);
+        checkScroll();
+      });
+    </script>
+  </body>
+</html>

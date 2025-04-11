@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <!-- Fragment chứa CSS cho theme -->
+    <th:block th:fragment="therapy-theme">
+      <!-- CSS cho dark mode - được áp dụng thông qua class 'dark-mode' -->
+      <link
+        th:href="@{/css/therapy-theme.css}"
+        rel="stylesheet"
+        id="therapy-theme-css"
+      />
+
+      <!-- Javascript cho việc quản lý theme -->
+      <script th:src="@{/js/theme-manager.js}" defer></script>
+    </th:block>
+  </body>
+</html>
