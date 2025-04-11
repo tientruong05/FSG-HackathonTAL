@@ -11,7 +11,7 @@
 	<groupId>com</groupId>
 	<artifactId>FSGHackathonTAL</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>FSGHackathonTAL</name>
 	<description>FSGHackathonTAL</description>
 	<url/>

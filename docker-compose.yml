@@ -15,6 +15,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=AVNS_dUm1dTIsI455euciU9a
     volumes:
       - uploads-data:/app/src/main/resources/static/uploads
+      - ./psychological_treatment.sql:/app/psychological_treatment.sql
     restart: always
 
 volumes:
