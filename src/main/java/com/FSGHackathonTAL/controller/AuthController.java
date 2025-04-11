@@ -54,6 +54,16 @@ public class AuthController {
     private SimpMessagingTemplate messagingTemplate;
 
     /**
+     * Xử lý đường dẫn gốc "/"
+     * Chuyển hướng đến trang chủ
+     * @return Chuyển hướng đến "/home"
+     */
+    @GetMapping("/")
+    public String index() {
+        return "redirect:/home";
+    }
+
+    /**
      * Hiển thị trang chủ.
      * Lấy thông tin người dùng đăng nhập, danh sách bác sĩ online, bài viết gần đây
      * và kiểm tra phiên chat đang hoạt động (nếu là user).

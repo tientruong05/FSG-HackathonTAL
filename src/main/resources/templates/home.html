@@ -142,50 +142,6 @@
           chữa lành
         </p>
 
-        <!-- Hiển thị phiên chat đang hoạt động (nếu có) -->
-        <div
-          class="row justify-content-center mb-4"
-          th:if="${loggedInUser != null && activeChatSession != null}"
-        >
-          <div class="col-md-8 col-lg-6">
-            <div class="card border-success">
-              <div class="card-header bg-success text-white">
-                <h5 class="mb-0">Phiên trò chuyện đang diễn ra</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-flex align-items-center">
-                  <img
-                    th:src="${activeDoctor.image}"
-                    alt="Doctor"
-                    class="me-3"
-                    style="
-                      width: 60px;
-                      height: 60px;
-                      object-fit: cover;
-                      border-radius: 50%;
-                    "
-                  />
-                  <div>
-                    <h6
-                      class="mb-1"
-                      th:text="'Bác sĩ: ' + ${activeDoctor.fullName}"
-                    ></h6>
-                    <p
-                      class="small text-muted mb-2"
-                      th:text="'Bắt đầu lúc: ' + ${#temporals.format(activeChatSession.startTime, 'dd/MM/yyyy HH:mm')}"
-                    ></p>
-                    <a
-                      th:href="@{/chat/{id}(id=${activeDoctor.userId})}"
-                      class="btn btn-success btn-sm"
-                      >Tiếp tục trò chuyện</a
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="service-cards-container">
           <div class="row justify-content-center">
             <div class="col-md-6 col-lg-3 mb-4">
@@ -203,7 +159,7 @@
                   href="#"
                   class="btn btn-service"
                   th:classappend="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? 'disabled' : ''"
-                  th:attr="data-bs-toggle=${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? null : 'modal', data-bs-target=${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? null : '#doctorSelectionModal'"
+                  th:onclick="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? null : 'openDoctorModal(); return false;'"
                   th:aria-disabled="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'}"
                   >Bắt đầu trò chuyện</a
                 >
@@ -519,6 +475,20 @@
             localStorage.setItem("theme", "light");
           }
         }
+
+        // Tìm tất cả các nút có liên quan đến modal bác sĩ và thêm event handler
+        const allDoctorModalButtons = document.querySelectorAll(
+          '[data-bs-target="#doctorSelectionModal"]'
+        );
+        allDoctorModalButtons.forEach((button) => {
+          button.addEventListener("click", function (e) {
+            e.preventDefault();
+            openDoctorModal();
+          });
+          // Loại bỏ attribute data-bs-target và data-bs-toggle để tránh xung đột
+          button.removeAttribute("data-bs-target");
+          button.removeAttribute("data-bs-toggle");
+        });
       });
     </script>
   </body>
