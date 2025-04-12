@@ -359,7 +359,11 @@
           // Kiểm tra xem đã có thông báo kết thúc phiên chat chưa
           const existingEndMessage = Array.from(
             chatMessages.querySelectorAll(".system-message")
-          ).find((msg) => msg.textContent.includes("Phiên chat đã kết thúc"));
+          ).find(
+            (msg) =>
+              msg.textContent.includes("Bác sĩ đã kết thúc phiên chat") ||
+              msg.textContent.includes("Phiên chat đã kết thúc")
+          );
 
           // Nếu đã có thông báo, không hiển thị lại
           if (existingEndMessage) {
@@ -369,7 +373,7 @@
           // Hiển thị thông báo trong khung chat
           const systemMessage = document.createElement("div");
           systemMessage.className = "system-message";
-          systemMessage.textContent = "Phiên chat đã kết thúc";
+          systemMessage.textContent = "Bác sĩ đã kết thúc phiên chat";
           systemMessage.style.textAlign = "center";
           systemMessage.style.margin = "10px auto";
           systemMessage.style.color = "#6c757d";
@@ -377,8 +381,13 @@
           chatMessages.appendChild(systemMessage);
           chatMessages.scrollTop = chatMessages.scrollHeight;
 
-          // Vô hiệu hóa input chat
-          disableChatInput();
+          // Đặt hẹn giờ chuyển hướng NGAY SAU KHI hiển thị thông báo
+          console.log("Đặt hẹn giờ chuyển hướng về trang chủ sau 3 giây");
+          setTimeout(function () {
+            console.log("Đang chuyển hướng về trang chủ...");
+            window.location.href = "/home";
+          }, 3000);
+
           return;
         }
 
@@ -572,8 +581,11 @@
                   // Kiểm tra xem đã có thông báo kết thúc phiên chat chưa
                   const existingEndMessage = Array.from(
                     chatMessages.querySelectorAll(".system-message")
-                  ).find((msg) =>
-                    msg.textContent.includes("Phiên chat đã kết thúc")
+                  ).find(
+                    (msg) =>
+                      msg.textContent.includes(
+                        "Bác sĩ đã kết thúc phiên chat"
+                      ) || msg.textContent.includes("Phiên chat đã kết thúc")
                   );
 
                   // Chỉ thêm thông báo nếu chưa có
@@ -581,28 +593,24 @@
                     // Hiển thị thông báo trong khung chat
                     const systemMessage = document.createElement("div");
                     systemMessage.className = "system-message";
-                    systemMessage.textContent = "Phiên chat đã kết thúc";
+                    systemMessage.textContent = "Bác sĩ đã kết thúc phiên chat";
                     systemMessage.style.textAlign = "center";
                     systemMessage.style.margin = "10px auto";
                     systemMessage.style.color = "#6c757d";
                     systemMessage.style.fontStyle = "italic";
                     chatMessages.appendChild(systemMessage);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                    // Đặt hẹn giờ chuyển hướng NGAY SAU KHI hiển thị thông báo
+                    console.log(
+                      "Đặt hẹn giờ chuyển hướng về trang chủ sau 3 giây"
+                    );
+                    setTimeout(function () {
+                      console.log("Đang chuyển hướng về trang chủ...");
+                      window.location.href = "/home";
+                    }, 3000);
                   }
 
-                  // Hiển thị modal thông báo nếu chưa hiển thị
-                  if (!successModal) {
-                    successModal = new bootstrap.Modal(
-                      document.getElementById("successModal")
-                    );
-                  }
-                  const successMessageEl =
-                    document.getElementById("successMessage");
-                  if (successMessageEl) {
-                    successMessageEl.textContent =
-                      "Bác sĩ đã kết thúc phiên chat.";
-                  }
-                  successModal.show();
                   return;
                 }
 
