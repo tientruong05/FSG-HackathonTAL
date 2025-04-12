@@ -45,7 +45,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 // URLs cho tài nguyên tĩnh - cho phép truy cập không cần xác thực
-                .requestMatchers("/uploads/**", "/css/**", "/js/**", "/images/**", "/static/**", "/fonts/**", "/favicon.ico").permitAll()
+                .requestMatchers("/uploads/**", "/music/**", "/sounds/**", "/css/**", "/js/**", "/images/**", "/static/**", "/fonts/**", "/favicon.ico").permitAll()
                 // URLs công khai - cho phép truy cập không cần xác thực
                 .requestMatchers("/", "/home", "/articles", "/articles/**", "/popular-doctors", "/chill-mode").permitAll()
                 .requestMatchers("/ws/**", "/topic/**", "/app/**").permitAll()
@@ -56,10 +56,12 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasAuthority("admin")
                 // URLs cho Doctor
                 .requestMatchers("/doctor/**").hasAuthority("doctor")
-                // URLs cho cả Admin và Doctor
+                // URLs for Admin và Doctor
                 .requestMatchers("/manage/**").hasAnyAuthority("admin", "doctor")
                 // URLs cho User đã đăng nhập
-                .requestMatchers("/chatbot", "/chat/**", "/profile/**").hasAuthority("user")
+                .requestMatchers("/chatbot", "/chat/**").hasAuthority("user")
+                // Profile có thể truy cập bởi cả user và doctor
+                .requestMatchers("/profile/**").hasAnyAuthority("user", "doctor")
                 // URLs cho bất kỳ người dùng đã đăng nhập nào
                 .requestMatchers("/dashboard").authenticated()
                 // Yêu cầu xác thực cho tất cả các URL còn lại

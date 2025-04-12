@@ -302,6 +302,29 @@ body.dark-mode .hero-section::before {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
+/* Thêm đoạn code cho home-hero-section */
+/* Đặc biệt: Giữ nguyên background image cho trang Home */
+body.dark-mode .home-hero-section {
+  background-image: url("https://i.postimg.cc/05BqcWvC/banner.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+}
+
+body.dark-mode .home-hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  ) !important;
+}
+
 /* Nút đọc bài */
 body.dark-mode .btn-article,
 body.dark-mode .btn-read {

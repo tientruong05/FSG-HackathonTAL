@@ -335,9 +335,13 @@
                   id="currentPassword"
                   name="currentPassword"
                   required
+                  th:classappend="${currentPasswordError == true} ? 'is-invalid' : ''"
                 />
-                <div class="invalid-feedback">
-                  Vui lòng nhập mật khẩu hiện tại
+                <div
+                  th:if="${currentPasswordError == true}"
+                  class="invalid-feedback"
+                >
+                  Mật khẩu hiện tại không chính xác
                 </div>
               </div>
 
@@ -472,17 +476,53 @@
       });
     </script>
 
-    <script>
+    <script th:inline="javascript">
       document.addEventListener("DOMContentLoaded", function () {
-        // Tự động ẩn thông báo sau 5 giây
-        const alerts = document.querySelectorAll(".alert");
-        alerts.forEach((alert) => {
-          setTimeout(() => {
-            alert.style.transition = "opacity 0.5s ease";
-            alert.style.opacity = "0";
-            setTimeout(() => alert.remove(), 500);
-          }, 5000);
-        });
+        // Kiểm tra nếu đổi mật khẩu thành công
+        const passwordChanged = /*[[${passwordChanged}]]*/ false;
+        const successMessage = /*[[${successMessage}]]*/ "";
+
+        if (passwordChanged === true) {
+          console.log("Đã phát hiện đổi mật khẩu thành công");
+
+          // Hiển thị thông báo thành công
+          const successAlert = document.querySelector(".alert-success");
+          if (successAlert) {
+            // Nếu có alert success, thêm thông báo đăng xuất
+            successAlert.innerHTML +=
+              "<br>Hệ thống sẽ tự động đăng xuất sau 5 giây. Vui lòng đăng nhập lại với mật khẩu mới.";
+          }
+
+          // Đếm ngược và tự động đăng xuất
+          let countDown = 5;
+          const interval = setInterval(function () {
+            countDown--;
+            if (countDown <= 0) {
+              clearInterval(interval);
+              // Đăng xuất và chuyển hướng về trang chủ
+              window.location.href = "/logout?password_changed=true";
+            } else if (successAlert) {
+              // Cập nhật đếm ngược trong thông báo
+              successAlert.innerHTML =
+                successMessage +
+                "<br>Hệ thống sẽ tự động đăng xuất sau " +
+                countDown +
+                " giây. Vui lòng đăng nhập lại với mật khẩu mới.";
+            }
+          }, 1000);
+        }
+
+        // Tự động ẩn thông báo sau 5 giây - chỉ cho thông báo lỗi hoặc nếu không phải đổi mật khẩu thành công
+        if (!passwordChanged) {
+          const alerts = document.querySelectorAll(".alert");
+          alerts.forEach((alert) => {
+            setTimeout(() => {
+              alert.style.transition = "opacity 0.5s ease";
+              alert.style.opacity = "0";
+              setTimeout(() => alert.remove(), 500);
+            }, 5000);
+          });
+        }
 
         // Bootstrap form validation
         var forms = document.querySelectorAll(".needs-validation");
@@ -518,6 +558,44 @@
             confirmInput.setCustomValidity("Mật khẩu xác nhận không khớp");
           } else {
             confirmInput.setCustomValidity("");
+          }
+        }
+
+        // Lấy tham số 'tab' từ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get("tab");
+
+        // Tự động hiển thị tab password nếu có lỗi mật khẩu hoặc tham số tab là 'password'
+        const passwordError = /*[[${passwordError}]]*/ null;
+        if (passwordError || activeTab === "password") {
+          const passwordTabButton = document.getElementById("password-tab");
+          if (passwordTabButton) {
+            const tab = new bootstrap.Tab(passwordTabButton);
+            tab.show();
+
+            // Cuộn đến vị trí form đổi mật khẩu nếu có lỗi
+            if (passwordError) {
+              const passwordForm = document.querySelector("#password form");
+              if (passwordForm) {
+                setTimeout(() => {
+                  passwordForm.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }, 100);
+              }
+
+              // Thêm lớp is-invalid cho trường mật khẩu hiện tại nếu có lỗi liên quan
+              if (passwordError.includes("hiện tại")) {
+                const currentPasswordInput =
+                  document.getElementById("currentPassword");
+                if (currentPasswordInput) {
+                  currentPasswordInput.classList.add("is-invalid");
+                  // Focus vào trường nhập
+                  setTimeout(() => currentPasswordInput.focus(), 300);
+                }
+              }
+            }
           }
         }
       });

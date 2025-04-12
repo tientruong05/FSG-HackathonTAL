@@ -29,31 +29,38 @@ public class FsgHackathonTalApplication {
 			@Override
 			public void addResourceHandlers(ResourceHandlerRegistry registry) {
 				try {
-					// Tạo các đường dẫn đến thư mục uploads
+					// Cấu hình chỉ cho music và sounds - uploads được xử lý trong WebMvcConfig
+					// để tránh xung đột mapping
+					
+					// Cấu hình cho thư mục music
 					String projectDir = System.getProperty("user.dir");
-					String uploadsPath = Paths.get(projectDir, "src", "main", "resources", "static", "uploads").toString();
-					File uploadsDir = new File(uploadsPath);
-					
-					// Tạo thư mục nếu chưa tồn tại
-					if (!uploadsDir.exists()) {
-						logger.info("Thư mục uploads không tồn tại, đang tạo: {}", uploadsPath);
-						uploadsDir.mkdirs();
+					String musicPath = Paths.get(projectDir, "src", "main", "resources", "static", "music").toString();
+					File musicDir = new File(musicPath);
+					if (!musicDir.exists()) {
+						logger.info("Thư mục music không tồn tại, đang tạo: {}", musicPath);
+						musicDir.mkdirs();
 					}
-					
-					// Tạo File URL phù hợp với hệ điều hành
-					String fileUrl = String.format("file:%s/", uploadsDir.getAbsolutePath().replace("\\", "/"));
-					
-					logger.info("Cấu hình ResourceHandler cho uploads: {}", fileUrl);
-					registry.addResourceHandler("/uploads/**")
-							.addResourceLocations(fileUrl)
+					String musicFileUrl = String.format("file:%s/", musicDir.getAbsolutePath().replace("\\", "/"));
+					logger.info("Cấu hình ResourceHandler cho music: {}", musicFileUrl);
+					registry.addResourceHandler("/music/**")
+							.addResourceLocations(musicFileUrl, "classpath:/static/music/")
 							.setCachePeriod(0);
 					
-					// Thêm bản sao lưu từ classpath trong trường hợp ứng dụng được đóng gói (JAR/WAR)
-					registry.addResourceHandler("/uploads/**")
-							.addResourceLocations("classpath:/static/uploads/")
+					// Cấu hình cho thư mục sounds
+					String soundsPath = Paths.get(projectDir, "src", "main", "resources", "static", "sounds").toString();
+					File soundsDir = new File(soundsPath);
+					if (!soundsDir.exists()) {
+						logger.info("Thư mục sounds không tồn tại, đang tạo: {}", soundsPath);
+						soundsDir.mkdirs();
+					}
+					String soundsFileUrl = String.format("file:%s/", soundsDir.getAbsolutePath().replace("\\", "/"));
+					logger.info("Cấu hình ResourceHandler cho sounds: {}", soundsFileUrl);
+					registry.addResourceHandler("/sounds/**")
+							.addResourceLocations(soundsFileUrl, "classpath:/static/sounds/")
 							.setCachePeriod(0);
+							
 				} catch (Exception e) {
-					logger.error("Lỗi khi cấu hình thư mục uploads: {}", e.getMessage(), e);
+					logger.error("Lỗi khi cấu hình thư mục tĩnh: {}", e.getMessage(), e);
 				}
 			}
 		};

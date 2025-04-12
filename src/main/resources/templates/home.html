@@ -52,7 +52,7 @@
     ></th:block>
 
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section home-hero-section">
       <div class="container hero-content">
         <h1 class="hero-title">Hành trình chữa lành cùng<br />Nắng Tâm Hồn</h1>
         <p class="hero-subtitle">
@@ -134,7 +134,11 @@
     </section>
 
     <!-- CTA Section -->
-    <section id="cta-section" class="cta-section">
+    <section
+      id="cta-section"
+      class="cta-section"
+      th:if="${loggedInUser == null || loggedInUser.role.roleName == 'user'}"
+    >
       <div class="container">
         <h2 class="cta-title">Bắt đầu hành trình chữa lành</h2>
         <p class="cta-subtitle">
@@ -144,6 +148,7 @@
 
         <div class="service-cards-container">
           <div class="row justify-content-center">
+            <!-- Card: Trò chuyện với các chuyên gia -->
             <div class="col-md-6 col-lg-3 mb-4">
               <div class="service-card">
                 <div class="service-icon">
@@ -158,9 +163,7 @@
                   th:if="${loggedInUser != null}"
                   href="#"
                   class="btn btn-service"
-                  th:classappend="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? 'disabled' : ''"
-                  th:onclick="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? null : 'openDoctorModal(); return false;'"
-                  th:aria-disabled="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'}"
+                  onclick="openDoctorModal(); return false;"
                   >Bắt đầu trò chuyện</a
                 >
                 <a
@@ -174,6 +177,7 @@
               </div>
             </div>
 
+            <!-- Card: Chatbot Tâm lý -->
             <div class="col-md-6 col-lg-3 mb-4">
               <div class="service-card">
                 <div class="service-icon">
@@ -183,10 +187,8 @@
                 <p>Trò chuyện 24/7 với trợ lý AI được đào tạo về tâm lý học</p>
                 <a
                   th:if="${loggedInUser != null}"
-                  th:href="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? '#' : '/chatbot'"
+                  th:href="@{/chatbot}"
                   class="btn btn-service"
-                  th:classappend="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'} ? 'disabled' : ''"
-                  th:aria-disabled="${loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor'}"
                   >Chat ngay</a
                 >
                 <a
@@ -200,6 +202,7 @@
               </div>
             </div>
 
+            <!-- Card: Đọc bài viết tài liệu -->
             <div class="col-md-6 col-lg-3 mb-4">
               <div class="service-card">
                 <div class="service-icon">
@@ -207,10 +210,11 @@
                 </div>
                 <h4>Đọc bài viết tài liệu</h4>
                 <p>Khám phá thông tin hữu ích về sức khỏe tâm lý</p>
-                <a href="/articles" class="btn btn-service">Đọc ngay</a>
+                <a th:href="@{/articles}" class="btn btn-service">Đọc ngay</a>
               </div>
             </div>
 
+            <!-- Card: Tôi không muốn làm gì cả -->
             <div class="col-md-6 col-lg-3 mb-4">
               <div class="service-card special-feature">
                 <h4 style="font-weight: 700">

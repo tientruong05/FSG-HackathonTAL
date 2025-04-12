@@ -791,9 +791,13 @@
         }
         // Lấy doctorId đã lưu từ biến toàn cục
         if (!doctorId) {
+          doctorId = /*[[${doctor.userId}]]*/ null; // Lấy doctorId từ Thymeleaf nếu chưa có
+        }
+
+        if (!doctorId) {
           console.error("Doctor ID not found to like.");
-          // Chỉ ẩn modal đánh giá
           if (ratingModal) ratingModal.hide();
+          window.location.href = "/home"; // Chuyển hướng về home ngay cả khi lỗi
           return;
         }
 
@@ -801,12 +805,10 @@
           `Liking doctor ID: ${doctorId} after ending session: ${sessionId}`
         );
 
-        // Ẩn modal đánh giá trước khi gọi API
         if (ratingModal) {
           ratingModal.hide();
         }
 
-        // Gọi API để thích bác sĩ
         fetch(`/like-doctor/${doctorId}`, {
           method: "POST",
           headers: {
@@ -818,39 +820,29 @@
             if (!response.ok) {
               console.warn("Like doctor request failed.");
             }
+            // Tiếp tục xử lý bất kể thành công hay thất bại
             return response.ok
               ? response.json()
               : Promise.resolve({ success: false });
           })
-          .then((data) => {
-            if (data.success) {
-              console.log(`Doctor ${doctorId} liked successfully.`);
-              // Không cần làm gì thêm sau khi ẩn modal
-              // Có thể thêm Toast nếu muốn: showToast("Cảm ơn bạn đã đánh giá!");
-            } else {
-              console.log("Failed to record like.");
-              // Không cần làm gì thêm sau khi ẩn modal
-            }
-          })
           .catch((error) => {
             console.error("Error liking doctor:", error);
-            // Không cần làm gì thêm sau khi ẩn modal
+            // Vẫn tiếp tục chuyển hướng về home
+          })
+          .finally(() => {
+            // Luôn chuyển hướng về home sau khi hoàn tất
+            window.location.href = "/home";
           });
       }
 
       // Kết thúc chat không thích bác sĩ
       function endChatWithoutLike() {
-        // Không cần gọi API kết thúc ở đây nữa vì đã kết thúc trước đó
-
         // Chỉ cần đóng modal đánh giá
         if (ratingModal) {
           ratingModal.hide();
         }
-
-        // Không cần hiển thị modal thành công nữa
-        // showSuccessModal("Phiên chat đã kết thúc.");
-
-        // Input đã được vô hiệu hóa trong executeEndUserChat
+        // Chuyển hướng về trang chủ
+        window.location.href = "/home";
       }
 
       // Vô hiệu hóa input chat sau khi kết thúc

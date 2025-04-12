@@ -119,29 +119,31 @@ public class ProfileController {
             // Verify current password
             if (!loggedInUser.getPassword().equals(currentPassword)) {
                 redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu hiện tại không đúng");
-                return "redirect:/profile";
+                redirectAttributes.addFlashAttribute("currentPasswordError", true);
+                return "redirect:/profile?tab=password";
             }
             
             // Check if new password meets requirements
             if (!userService.isValidPassword(newPassword)) {
                 redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới phải có ít nhất 8 ký tự và không chứa khoảng trắng");
-                return "redirect:/profile";
+                return "redirect:/profile?tab=password";
             }
             
             // Verify password confirmation
             if (!newPassword.equals(confirmPassword)) {
                 redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu xác nhận không khớp");
-                return "redirect:/profile";
+                return "redirect:/profile?tab=password";
             }
             
             // Update password
             loggedInUser.setPassword(newPassword);
             userService.saveUser(loggedInUser);
             redirectAttributes.addFlashAttribute("successMessage", "Mật khẩu đã được cập nhật thành công!");
+            redirectAttributes.addFlashAttribute("passwordChanged", true);
+            return "redirect:/profile?tab=password";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("passwordError", "Lỗi khi cập nhật mật khẩu: " + e.getMessage());
+            return "redirect:/profile?tab=password";
         }
-        
-        return "redirect:/profile";
     }
 }

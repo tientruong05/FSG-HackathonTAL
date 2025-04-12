@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Lớp tiện ích để xử lý việc tải lên và lưu trữ file.
@@ -19,10 +21,12 @@ import java.util.UUID;
  */
 @Component
 public class FileUploadUtil {
+    
+    private static final Logger logger = LoggerFactory.getLogger(FileUploadUtil.class);
 
-    // Đường dẫn thư mục lưu trữ file, lấy từ application.properties hoặc giá trị mặc định
-    @Value("${file.upload-dir:./src/main/resources/static/uploads}")
-    private String UPLOAD_DIR;
+    // Đường dẫn thư mục lưu trữ file, luôn sử dụng thư mục uploads trong static
+    @Value("${file.upload-dir:#{null}}")
+    private String configUploadDir;
     
     // Dùng để tải lại resource sau khi lưu, đảm bảo tính nhất quán
     private final ResourceLoader resourceLoader;
@@ -36,8 +40,8 @@ public class FileUploadUtil {
     }
 
     /**
-     * Lưu một MultipartFile vào thư mục UPLOAD_DIR.
-     * Tạo tên file ngẫu nhiên bằng UUID và giữ phần mở rộng gốc.
+     * Lưu một MultipartFile vào thư mục uploads.
+     * Tạo tên file ngẫu nhiên bằng UUID và giữ nguyên phần mở rộng gốc.
      * Tạo thư mục nếu chưa tồn tại.
      * Ghi đè file nếu tên file đã tồn tại (do UUID gần như không trùng).
      * Trả về đường dẫn tương đối của file đã lưu (ví dụ: /uploads/uuid.jpg).
@@ -50,12 +54,31 @@ public class FileUploadUtil {
         if (file.isEmpty()) {
             throw new IOException("Không thể lưu file rỗng.");
         }
+        
+        // Xác định đường dẫn uploads thực tế
+        Path uploadPath;
+        String projectDir = System.getProperty("user.dir");
+        
+        // Đầu tiên kiểm tra cấu hình từ application.properties
+        if (configUploadDir != null && !configUploadDir.isEmpty()) {
+            uploadPath = Paths.get(configUploadDir);
+        } else {
+            // Sử dụng đường dẫn mặc định trong project
+            uploadPath = Paths.get(projectDir, "src", "main", "resources", "static", "uploads");
+            
+            // Cũng kiểm tra trường hợp đường dẫn với FSGHackathonTAL
+            Path altPath = Paths.get(projectDir, "FSGHackathonTAL", "src", "main", "resources", "static", "uploads");
+            if (Files.exists(altPath)) {
+                uploadPath = altPath;
+            }
+        }
+        
+        logger.info("Đường dẫn upload: {}", uploadPath);
 
-        Path uploadPath = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
         // Tạo thư mục nếu chưa tồn tại
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
-            System.out.println("Đã tạo thư mục upload: " + uploadPath);
+            logger.info("Đã tạo thư mục upload: {}", uploadPath);
         }
 
         // Tạo tên file ngẫu nhiên (UUID) để tránh trùng lặp
@@ -72,17 +95,16 @@ public class FileUploadUtil {
         String newFileName = randomFileName + fileExtension;
         Path filePath = uploadPath.resolve(newFileName);
         
-        System.out.println("Đang lưu file tới: " + filePath);
+        logger.info("Đang lưu file tới: {}", filePath);
 
         // Sao chép nội dung file vào đường dẫn đích, ghi đè nếu tồn tại
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         
         // Cố gắng làm mới resource để hệ thống nhận diện file mới ngay lập tức
-        // (Có thể không cần thiết tùy thuộc vào cấu hình server)
         try {
             resourceLoader.getResource("file:" + filePath).getInputStream().close();
         } catch (Exception e) {
-            System.out.println("Cảnh báo khi làm mới resource: " + e.getMessage());
+            logger.warn("Cảnh báo khi làm mới resource: {}", e.getMessage());
         }
         
         // Trả về đường dẫn tương đối để sử dụng trong HTML/template

@@ -80,7 +80,25 @@ public class ChatbotService {
         "có ai hiểu tôi không", "tôi không còn thiết sống", "tôi không biết phải làm gì",
         "tôi không còn đường nào khác", "tôi không thấy hy vọng", "không còn hy vọng",
         "vô vọng", "tuyệt vọng", "tận cùng", "cùng cực", "khốn cùng", "bất lực", "bất lực",
-        "bồn chồn", "căng thẳng", "áp lực", "stress", "không yên", "không thể thư giãn"
+        "bồn chồn", "căng thẳng", "áp lực", "stress", "không yên", "không thể thư giãn",
+        
+        // Thêm các từ khóa dạng câu hỏi và tìm kiếm lời khuyên
+        "tôi nên", "tôi phải", "tôi cần", "làm gì", "làm sao", "như thế nào", 
+        "bằng cách nào", "giúp đỡ", "tư vấn", "khuyên", "lời khuyên", "hướng dẫn",
+        "nên làm gì", "phải làm gì", "cần làm gì", "làm thế nào", "làm cách nào",
+        "có nên không", "có phải không", "có cần không", "nên hay không",
+        "mình nên", "mình phải", "mình cần", "mình muốn", "tôi muốn",
+        "tìm cách", "tìm hướng đi", "tìm lối thoát", "tìm giải pháp", "tìm hiểu",
+        "có cách nào", "có phương pháp nào", "có ai giúp", "ai có thể giúp",
+        "làm gì để", "làm sao để", "cách nào để", "phương pháp nào để",
+        "mong muốn", "ước", "hy vọng", "mơ ước", "ao ước", "khát khao",
+        "tại sao tôi", "vì sao tôi", "lý do nào", "nguyên nhân",
+        "điều gì", "chuyện gì", "vấn đề gì", "lý do gì",
+        "bao lâu", "khi nào", "lúc nào", "thời gian",
+        "ở đâu", "nơi nào", "chỗ nào", "địa điểm",
+        "ai biết", "ai hiểu", "ai từng", "ai đã",
+        "kinh nghiệm", "trải nghiệm", "từng trải", "bài học",
+        "thay đổi", "cải thiện", "nâng cao", "phát triển"
     );
 
     /**

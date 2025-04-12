@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Breathing Exercise</title>
+    <title>Hãy thư giãn</title>
     <style>
       body {
         margin: 0;
@@ -179,40 +179,36 @@
         position: absolute;
         bottom: 20px;
         left: 20px;
-        padding: 10px 20px;
-        background-color: rgba(255, 255, 255, 0.2); /* Mờ ban đầu */
-        color: white; /* Màu chữ trắng */
-        font-size: 18px;
+        padding: 0;
+        background-color: rgba(255, 255, 255, 0.2);
         border: 2px solid rgba(255, 255, 255, 0.8);
         border-radius: 25px;
         cursor: pointer;
-        transition: background-color 0.3s, transform 0.2s, opacity 0.3s; /* Thêm transition cho opacity */
-        opacity: 0.6; /* Độ mờ ban đầu */
+        transition: background-color 0.3s, transform 0.2s, opacity 0.3s;
+        opacity: 0.6;
       }
 
       .ok-button a {
-        color: white; /* Đổi màu chữ trong thẻ <a> thành trắng để đồng nhất */
+        display: block;
+        padding: 10px 20px;
+        color: white;
         text-decoration: none;
+        font-size: 18px;
+        transition: color 0.3s;
       }
 
       .ok-button:hover {
-        background-color: rgba(
-          255,
-          255,
-          255,
-          1
-        ); /* Trắng hoàn toàn khi hover */
-        opacity: 1; /* Rõ hoàn toàn */
-        transform: scale(1.05); /* Phóng to nhẹ */
+        background-color: rgba(255, 255, 255, 1);
+        opacity: 1;
+        transform: scale(1.05);
       }
 
-      .ok-button a:hover {
-        color: black; /* Đổi màu chữ trong thẻ <a> thành trắng để đồng nhất */
-        text-decoration: none;
+      .ok-button:hover a {
+        color: black;
       }
 
       .ok-button:active {
-        transform: scale(0.95); /* Thu nhỏ khi nhấn */
+        transform: scale(0.95);
       }
     </style>
     <link
