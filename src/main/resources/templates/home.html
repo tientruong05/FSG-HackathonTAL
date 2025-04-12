@@ -220,11 +220,7 @@
                   Đôi khi, việc không làm gì cũng là một lựa chọn. Hãy cho phép
                   bản thân được nghỉ ngơi.
                 </p>
-                <a
-                  th:href="${loggedInUser != null && (loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor')} ? '#' : '/chill-mode'"
-                  class="btn btn-rest"
-                  th:classappend="${loggedInUser != null && (loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor')} ? 'disabled' : ''"
-                  th:aria-disabled="${loggedInUser != null && (loggedInUser.role.roleName == 'admin' || loggedInUser.role.roleName == 'doctor')}"
+                <a th:href="@{/chill-mode}" class="btn btn-rest"
                   >Chỉ cần ở đây</a
                 >
               </div>

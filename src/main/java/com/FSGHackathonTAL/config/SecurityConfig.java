@@ -47,7 +47,7 @@ public class SecurityConfig {
                 // URLs cho tài nguyên tĩnh - cho phép truy cập không cần xác thực
                 .requestMatchers("/uploads/**", "/css/**", "/js/**", "/images/**", "/static/**", "/fonts/**", "/favicon.ico").permitAll()
                 // URLs công khai - cho phép truy cập không cần xác thực
-                .requestMatchers("/", "/home", "/articles", "/articles/**", "/popular-doctors").permitAll()
+                .requestMatchers("/", "/home", "/articles", "/articles/**", "/popular-doctors", "/chill-mode").permitAll()
                 .requestMatchers("/ws/**", "/topic/**", "/app/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/user/login", "/user/register").permitAll()
@@ -59,7 +59,7 @@ public class SecurityConfig {
                 // URLs cho cả Admin và Doctor
                 .requestMatchers("/manage/**").hasAnyAuthority("admin", "doctor")
                 // URLs cho User đã đăng nhập
-                .requestMatchers("/chatbot", "/chat/**", "/profile/**", "/chill-mode").hasAuthority("user")
+                .requestMatchers("/chatbot", "/chat/**", "/profile/**").hasAuthority("user")
                 // URLs cho bất kỳ người dùng đã đăng nhập nào
                 .requestMatchers("/dashboard").authenticated()
                 // Yêu cầu xác thực cho tất cả các URL còn lại

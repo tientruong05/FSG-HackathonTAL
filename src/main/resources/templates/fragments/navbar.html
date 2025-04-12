@@ -55,7 +55,7 @@
             </li>
             <li
               class="nav-item"
-              th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user'}"
+              th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user' or loggedInUser.role.roleName == 'admin'}"
             >
               <a class="nav-link fw-bold" th:href="@{/chill-mode}">Thư giãn</a>
             </li>
