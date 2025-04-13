@@ -320,6 +320,23 @@
 
       // Tải lịch sử chat từ local storage khi trang tải
       document.addEventListener("DOMContentLoaded", function () {
+        // Kiểm tra nếu ID người dùng khác với ID được lưu trong localStorage
+        const storedUserId = localStorage.getItem("chatbotUserId");
+
+        // Nếu có storedUserId nhưng khác với currentUserId hiện tại
+        // hoặc nếu có lịch sử chat nhưng không có storedUserId
+        // thì xóa lịch sử chat
+        if (
+          (storedUserId && storedUserId !== currentUserId.toString()) ||
+          (!storedUserId && localStorage.getItem("chatbotHistory"))
+        ) {
+          console.log("Người dùng đã thay đổi, xóa lịch sử chat cũ");
+          localStorage.removeItem("chatbotHistory");
+        }
+
+        // Lưu ID người dùng hiện tại vào localStorage
+        localStorage.setItem("chatbotUserId", currentUserId);
+
         loadChatHistory();
 
         // Xử lý gửi tin nhắn

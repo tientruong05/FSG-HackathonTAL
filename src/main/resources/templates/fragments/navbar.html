@@ -168,7 +168,9 @@
                   >
                 </li>
                 <li>
-                  <a class="dropdown-item" th:href="@{/logout}">Đăng xuất</a>
+                  <a class="dropdown-item" th:href="@{/logout}" id="logout-link"
+                    >Đăng xuất</a
+                  >
                 </li>
               </ul>
             </div>
@@ -180,6 +182,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script th:inline="javascript">
       document.addEventListener("DOMContentLoaded", function () {
+        // Xử lý sự kiện đăng xuất - xóa lịch sử chat khỏi localStorage
+        const logoutLink = document.getElementById("logout-link");
+        if (logoutLink) {
+          logoutLink.addEventListener("click", function (e) {
+            // Xóa lịch sử chat từ localStorage khi đăng xuất
+            localStorage.removeItem("chatbotHistory");
+            console.log("Đã xóa lịch sử chat từ localStorage");
+            // Tiếp tục đăng xuất bình thường
+          });
+        }
+
         const userRole =
           /*[[${loggedInUser != null ? loggedInUser.role.roleName : 'not-logged-in'}]]*/ null;
         console.log("Current user role from Thymeleaf:", userRole);

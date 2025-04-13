@@ -121,7 +121,12 @@
                   class="alert alert-success"
                   th:text="${registerSuccess}"
                 ></div>
-                <form th:action="@{/user/register}" method="post">
+                <form
+                  th:action="@{/user/register}"
+                  method="post"
+                  class="needs-validation"
+                  novalidate
+                >
                   <div class="mb-3">
                     <label for="registerName" class="form-label"
                       >Họ và tên</label
@@ -134,6 +139,7 @@
                       placeholder="Nhập họ và tên"
                       required
                     />
+                    <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
                   </div>
                   <div class="mb-3">
                     <label for="registerEmail" class="form-label">Email</label>
@@ -144,7 +150,13 @@
                       name="email"
                       placeholder="Nhập email"
                       required
+                      pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                      oninvalid="this.setCustomValidity('Vui lòng nhập email có định dạng @gmail.com')"
+                      oninput="this.setCustomValidity('')"
                     />
+                    <div class="invalid-feedback">
+                      Vui lòng nhập email định dạng @gmail.com
+                    </div>
                   </div>
                   <div class="mb-3">
                     <label for="registerPassword" class="form-label"
@@ -157,7 +169,15 @@
                       name="password"
                       placeholder="Tạo mật khẩu"
                       required
+                      minlength="8"
+                      pattern="^[^\s]+$"
+                      oninvalid="this.setCustomValidity('Mật khẩu phải có ít nhất 8 ký tự và không chứa khoảng trắng')"
+                      oninput="this.setCustomValidity('')"
                     />
+                    <div class="invalid-feedback">
+                      Mật khẩu phải có ít nhất 8 ký tự và không chứa khoảng
+                      trắng
+                    </div>
                   </div>
                   <div class="mb-3">
                     <label for="registerConfirmPassword" class="form-label"
@@ -171,6 +191,10 @@
                       placeholder="Nhập lại mật khẩu"
                       required
                     />
+                    <div class="invalid-feedback">
+                      Vui lòng đảm bảo mật khẩu xác nhận trùng khớp với mật khẩu
+                      mới
+                    </div>
                   </div>
                   <button type="submit" class="btn btn-primary w-100">
                     Đăng ký
@@ -204,6 +228,79 @@
             // Lưu email đăng nhập để sau kiểm tra
             const loginEmail = document.getElementById("loginEmail").value;
             localStorage.setItem("lastLoginEmail", loginEmail);
+          });
+        }
+
+        // Thêm validation cho form đăng ký
+        const registerPassword = document.getElementById("registerPassword");
+        const registerConfirmPassword = document.getElementById(
+          "registerConfirmPassword"
+        );
+
+        // Kiểm tra xác nhận mật khẩu khi người dùng nhập
+        if (registerConfirmPassword && registerPassword) {
+          registerConfirmPassword.addEventListener(
+            "input",
+            validatePasswordMatch
+          );
+          registerPassword.addEventListener("input", validatePasswordMatch);
+        }
+
+        // Hàm kiểm tra khớp mật khẩu
+        function validatePasswordMatch() {
+          if (registerPassword.value !== registerConfirmPassword.value) {
+            registerConfirmPassword.setCustomValidity(
+              "Mật khẩu xác nhận không khớp"
+            );
+          } else {
+            registerConfirmPassword.setCustomValidity("");
+          }
+        }
+
+        // Kích hoạt validation Bootstrap cho form đăng ký
+        const registerForm = document.querySelector("#register form");
+        if (registerForm) {
+          registerForm.addEventListener(
+            "submit",
+            function (event) {
+              if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+
+              // Kiểm tra thêm điều kiện email @gmail.com trước khi submit
+              const emailInput = document.getElementById("registerEmail");
+              if (emailInput && !validateGmailFormat(emailInput.value)) {
+                emailInput.setCustomValidity(
+                  "Vui lòng nhập email có định dạng @gmail.com"
+                );
+                event.preventDefault();
+                event.stopPropagation();
+              }
+
+              this.classList.add("was-validated");
+            },
+            false
+          );
+        }
+
+        // Thêm hàm kiểm tra định dạng email gmail
+        function validateGmailFormat(email) {
+          const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+          return gmailRegex.test(email);
+        }
+
+        // Thêm kiểm tra format email khi người dùng nhập
+        const registerEmail = document.getElementById("registerEmail");
+        if (registerEmail) {
+          registerEmail.addEventListener("input", function () {
+            if (this.value && !validateGmailFormat(this.value)) {
+              this.setCustomValidity(
+                "Vui lòng nhập email có định dạng @gmail.com"
+              );
+            } else {
+              this.setCustomValidity("");
+            }
           });
         }
       });

@@ -46,6 +46,16 @@ public class UserService {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email đã được sử dụng!");
         }
+        
+        // Kiểm tra email phải có đuôi @gmail.com
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+            throw new IllegalArgumentException("Email phải có định dạng @gmail.com!");
+        }
+        
+        // Kiểm tra mật khẩu hợp lệ
+        if (!isValidPassword(password)) {
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 8 ký tự và không chứa khoảng trắng!");
+        }
 
         User user = new User();
         user.setFullName(fullName);
@@ -156,8 +166,9 @@ public class UserService {
             throw new IllegalArgumentException("Email không được để trống");
         }
         
-        if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            throw new IllegalArgumentException("Email không hợp lệ");
+        // Kiểm tra email phải có định dạng @gmail.com
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+            throw new IllegalArgumentException("Email phải có định dạng @gmail.com");
         }
         
         if (isEmailExist(email, userId)) {
