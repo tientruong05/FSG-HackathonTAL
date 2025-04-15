@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Full Stack GPT - Bảng điều khiển Admin</title>
+    <!-- Thêm favicon -->
+    <th:block th:replace="~{fragments/therapy-theme :: favicon}"></th:block>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
@@ -331,7 +333,9 @@
             </thead>
             <tbody>
               <tr th:each="article, status : ${articles}">
-                <td th:text="${articlePage.number * articlePage.size + status.count}"></td>
+                <td
+                  th:text="${articlePage.number * articlePage.size + status.count}"
+                ></td>
                 <td th:text="${article.title}"></td>
                 <td>
                   <img
@@ -486,7 +490,9 @@
             </thead>
             <tbody>
               <tr th:each="doctor, status : ${doctors}">
-                <td th:text="${doctorPage.number * doctorPage.size + status.count}"></td>
+                <td
+                  th:text="${doctorPage.number * doctorPage.size + status.count}"
+                ></td>
                 <td th:text="${doctor.fullName}"></td>
                 <td th:text="${doctor.email}"></td>
                 <td th:text="${doctor.phone}"></td>
@@ -655,7 +661,9 @@
             </thead>
             <tbody>
               <tr th:each="user, status : ${users}">
-                <td th:text="${userPage.number * userPage.size + status.count}"></td>
+                <td
+                  th:text="${userPage.number * userPage.size + status.count}"
+                ></td>
                 <td th:text="${user.fullName}"></td>
                 <td th:text="${user.email}"></td>
                 <td th:text="${user.phone}"></td>
@@ -1399,17 +1407,17 @@
         });
 
         // Xử lý chuyển tab để reset phân trang về trang 1
-        const tabLinks = document.querySelectorAll('.nav-tabs .nav-link');
-        tabLinks.forEach(link => {
-          link.addEventListener('click', function(e) {
+        const tabLinks = document.querySelectorAll(".nav-tabs .nav-link");
+        tabLinks.forEach((link) => {
+          link.addEventListener("click", function (e) {
             // Lấy tab được click
-            const targetTab = this.getAttribute('href').substring(1); // Bỏ dấu # ở đầu
+            const targetTab = this.getAttribute("href").substring(1); // Bỏ dấu # ở đầu
             // Lấy URL hiện tại
             const url = new URL(window.location.href);
             // Cập nhật tham số tab
-            url.searchParams.set('tab', targetTab);
+            url.searchParams.set("tab", targetTab);
             // Reset trang về trang 1 (page=0 vì đánh số từ 0)
-            url.searchParams.set('page', '0');
+            url.searchParams.set("page", "0");
             // Điều hướng đến URL mới
             window.location.href = url.toString();
             // Ngăn hành vi mặc định của thẻ a

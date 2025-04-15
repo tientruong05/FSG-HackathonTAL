@@ -28,10 +28,7 @@ public class FsgHackathonTalApplication {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addResourceHandlers(ResourceHandlerRegistry registry) {
-				try {
-					// Cấu hình chỉ cho music và sounds - uploads được xử lý trong WebMvcConfig
-					// để tránh xung đột mapping
-					
+				try {					
 					// Cấu hình cho thư mục music
 					String projectDir = System.getProperty("user.dir");
 					String musicPath = Paths.get(projectDir, "src", "main", "resources", "static", "music").toString();
