@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ChatbotService {
@@ -32,6 +34,63 @@ public class ChatbotService {
     
     @Value("${gemini.api.endpoint:https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent}")
     private String geminiApiEndpoint;
+    
+    // Danh sách các pattern regex để nhận dạng thông tin cá nhân
+    private static final List<Pattern> PERSONAL_INFO_PATTERNS = Arrays.asList(
+        // Họ tên dạng "Nguyễn Văn A" hoặc "Nguyen Van A"
+        Pattern.compile("(?i)(tên (tôi|mình|của tôi|em|chị|anh|cháu) là |tôi là |mình là |tên |họ tên |[Tt]ôi tên là )([A-Za-zÀ-ỹ\\s]{2,30})"),
+        // Phiên bản không dấu
+        Pattern.compile("(?i)(ten (toi|minh|cua toi|em|chi|anh|chau) la |toi la |minh la |ten |ho ten |[Tt]oi ten la )([A-Za-z\\s]{2,30})"),
+        
+        // Số điện thoại Việt Nam
+        Pattern.compile("\\b(0[1-9][0-9]{8}|\\+84[1-9][0-9]{8})\\b"),
+        
+        // Email
+        Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}\\b"),
+        
+        // Số nhà, đường phố
+        Pattern.compile("(?i)(số [0-9]{1,4}[A-Za-z]?|[0-9]{1,4}[A-Za-z]?/?[0-9]{0,4}[A-Za-z]?) (?:đường|phố|ngõ|ngách|hẻm|tổ|khu phố|khu đô thị|khu) [A-Za-zÀ-ỹ\\s0-9\\,\\-\\/]{2,50}"),
+        // Phiên bản không dấu
+        Pattern.compile("(?i)(so [0-9]{1,4}[A-Za-z]?|[0-9]{1,4}[A-Za-z]?/?[0-9]{0,4}[A-Za-z]?) (?:duong|pho|ngo|ngach|hem|to|khu pho|khu do thi|khu) [A-Za-z\\s0-9\\,\\-\\/]{2,50}"),
+        
+        // Khu vực, phường/xã, quận/huyện, tỉnh/thành phố
+        Pattern.compile("(?i)(phường|xã|quận|huyện|thị xã|thành phố|tỉnh) [A-Za-zÀ-ỹ\\s0-9\\,\\-\\/]{2,30}"),
+        // Phiên bản không dấu
+        Pattern.compile("(?i)(phuong|xa|quan|huyen|thi xa|thanh pho|tinh) [A-Za-z\\s0-9\\,\\-\\/]{2,30}"),
+        
+        // Năm sinh, ngày sinh
+        Pattern.compile("(?i)(sinh ngày|ngày sinh|sinh năm|năm sinh|dob) [0-9]{1,2}[\\-\\/\\.][0-9]{1,2}[\\-\\/\\.][0-9]{2,4}"),
+        // Phiên bản không dấu
+        Pattern.compile("(?i)(sinh ngay|ngay sinh|sinh nam|nam sinh|dob) [0-9]{1,2}[\\-\\/\\.][0-9]{1,2}[\\-\\/\\.][0-9]{2,4}"),
+        
+        // Sinh năm
+        Pattern.compile("(?i)(sinh năm|năm sinh) [0-9]{4}"),
+        // Phiên bản không dấu
+        Pattern.compile("(?i)(sinh nam|nam sinh) [0-9]{4}"),
+        
+        // CMND, CCCD, passport
+        Pattern.compile("(?i)((số |mã |)(CMND|CCCD|căn cước|chứng minh nhân dân|hộ chiếu|passport) ?(là |của tôi là |)([0-9]{9}|[0-9]{12}))"),
+        // Phiên bản không dấu
+        Pattern.compile("(?i)((so |ma |)(CMND|CCCD|can cuoc|chung minh nhan dan|ho chieu|passport) ?(la |cua toi la |)([0-9]{9}|[0-9]{12}))"),
+        
+        // Địa chỉ full
+        Pattern.compile("(?i)(địa chỉ|nhà|nơi ở|chỗ ở|residence) (là |của tôi là |)(ở |tại |)[A-Za-zÀ-ỹ\\s0-9\\,\\-\\/]{5,100}"),
+        // Phiên bản không dấu
+        Pattern.compile("(?i)(dia chi|nha|noi o|cho o|residence) (la |cua toi la |)(o |tai |)[A-Za-z\\s0-9\\,\\-\\/]{5,100}")
+    );
+    
+    // Danh sách các từ khóa chỉ địa điểm riêng để lọc
+    private static final List<String> LOCATION_KEYWORDS = Arrays.asList(
+        // Phiên bản có dấu
+        "Hà Nội", "TPHCM", "TP HCM", "Thành phố Hồ Chí Minh", "Sài Gòn", "Đà Nẵng", "Hải Phòng", "Cần Thơ",
+        "Biên Hòa", "Nha Trang", "Vinh", "Huế", "Quảng Ninh", "Hạ Long", "Hải Dương", "Thái Nguyên",
+        "Vũng Tàu", "Bắc Ninh", "Thanh Hóa", "Bắc Giang", "Nam Định", "Thái Bình", 
+        
+        // Phiên bản không dấu
+        "Ha Noi", "Thanh pho Ho Chi Minh", "Sai Gon", "Da Nang", "Hai Phong", "Can Tho",
+        "Bien Hoa", "Vinh", "Hue", "Quang Ninh", "Ha Long", "Hai Duong", "Thai Nguyen",
+        "Vung Tau", "Bac Ninh", "Thanh Hoa", "Bac Giang", "Nam Dinh", "Thai Binh"
+    );
     
     // List of keywords related to mental health to filter questions
     private static final List<String> MENTAL_HEALTH_KEYWORDS = Arrays.asList(
@@ -98,7 +157,41 @@ public class ChatbotService {
         "ở đâu", "nơi nào", "chỗ nào", "địa điểm",
         "ai biết", "ai hiểu", "ai từng", "ai đã",
         "kinh nghiệm", "trải nghiệm", "từng trải", "bài học",
-        "thay đổi", "cải thiện", "nâng cao", "phát triển"
+        "thay đổi", "cải thiện", "nâng cao", "phát triển",
+        
+        // Thêm các từ khóa phiên bản không dấu
+        "lo au", "tram cam", "cang thang", "buon", "lo lang", "so hai",
+        "hoang loan", "co don", "tam ly", "tinh than", "suc khoe tam than", "tu tu",
+        "ton thuong", "dau kho", "mat ngu", "cam xuc", "kho chiu", "tuc gian", 
+        "gian du", "mat tap trung", "roi loan", "met moi", "kiet suc", "ap luc",
+        "sang chan", "am anh", "suy nghi tieu cuc", 
+        "dau dau", "nhuc dau", "dau bung", "chong mat", "mat dong luc", "tho o", 
+        "kho tap trung", "tieu cuc", "khung hoang", "tuyet vong", "that vong", 
+        "khong vui", "buon chan", "chan nan", "bat an", "hoang mang", "suy sup", 
+        "cang thang dau oc", "stress hoc tap", "ap luc cong viec",
+        "kiet suc tinh than", "tam trang", "tam trang that thuong", 
+        "qua tai", "that bai", "that tinh", "chia tay", "co don", 
+        "co lap", "ton thuong", "bi ton thuong", "buon ba", "tui than", 
+        "tu ti", "thieu tu tin", "khong tu tin",
+        "qua nhay cam", "nhay cam", "de xuc dong", "hay khoc", "khoc", "buon khoc",
+        "khong muon song", "khong thay vui", "khong con niem vui", "khong dam me", 
+        "mat dam me", "mat di hung thu", "khong biet phai lam gi", "hoang mang", 
+        "khong biet tuong lai", "tuong lai mo mit", "boi roi",
+        // Thêm các từ khóa về mệt mỏi (không dấu)
+        "toi met qua", "toi cam thay qua met", "met lam", "met qua", "cam thay met",
+        "met moi qua", "kiet suc qua", "toi kiet suc", "qua met moi", "met ra roi",
+        "khong con suc luc", "het nang luong", "met du du", "khong muon lam gi ca",
+        "khong co dong luc", "khong con nang luong", "khong muon thuc day",
+        "chang muon lam gi", "khong thiet tha", "khong co hung thu", "mat het dong luc",
+        // Thêm các cách diễn đạt thông thường (không dấu)
+        "toi cam thay", "toi thay", "toi dang", "toi bi", "toi hay", "toi luon", "toi khong the",
+        "toi chan", "toi buon", "toi lo", "toi so", "toi khong biet phai lam sao",
+        "toi khong hieu", "toi khong muon", "toi ghet", "toi kho", "toi can giup do",
+        "giup toi", "cuu toi", "toi muon chet", "toi muon bien mat", "toi khong muon song",
+        "cuoc song", "cuoc doi", "khong con y nghia", "toi dau", "kho so", "dau don", 
+        "dau kho qua", "song khong noi", "qua cang thang", "qua ap luc", "khong chiu noi",
+        "chiu khong noi", "qua suc", "toi duoi suc", "het chiu noi", "be tac", "khong loi thoat",
+        "quan tri", "roi tri", "roi boi", "roi loan", "bat on", "kho khan", "van de", "tran tro"
     );
 
     /**
@@ -112,22 +205,74 @@ public class ChatbotService {
     }
     
     /**
+     * Lọc thông tin cá nhân từ câu hỏi của người dùng
+     * @param question Câu hỏi gốc
+     * @return Câu hỏi đã được lọc bỏ thông tin cá nhân
+     */
+    private String filterPersonalInfo(String question) {
+        if (question == null || question.trim().isEmpty()) {
+            return question;
+        }
+        
+        String filteredQuestion = question;
+        
+        // Lọc các pattern thông tin cá nhân
+        for (Pattern pattern : PERSONAL_INFO_PATTERNS) {
+            Matcher matcher = pattern.matcher(filteredQuestion);
+            if (matcher.find()) {
+                // Thay thế thông tin cá nhân bằng "[THÔNG TIN CÁ NHÂN]"
+                filteredQuestion = matcher.replaceAll("[THÔNG TIN CÁ NHÂN]");
+            }
+        }
+        
+        // Lọc các địa điểm cụ thể
+        for (String location : LOCATION_KEYWORDS) {
+            // Tạo pattern với word boundary để tránh thay thế một phần của từ
+            String regex = "\\b" + Pattern.quote(location) + "\\b";
+            filteredQuestion = filteredQuestion.replaceAll(regex, "[ĐỊA ĐIỂM]");
+        }
+        
+        // Kiểm tra nếu câu hỏi đã bị lọc hết (chỉ còn placeholder)
+        if (filteredQuestion.trim().equals("[THÔNG TIN CÁ NHÂN]") || 
+            filteredQuestion.trim().equals("[ĐỊA ĐIỂM]")) {
+            return "Tôi đang gặp vấn đề tâm lý";
+        }
+        
+        // Log thông tin debug
+        if (!filteredQuestion.equals(question)) {
+            System.out.println("Đã lọc thông tin cá nhân từ câu hỏi:");
+            System.out.println("- Gốc: " + question);
+            System.out.println("- Đã lọc: " + filteredQuestion);
+        }
+        
+        return filteredQuestion;
+    }
+    
+    /**
      * Get a response for a question, and if not found, ask an AI API
      * and save the question and answer to the database
      */
     public String getResponseAndSaveIfNew(String question) {
+        // Lọc thông tin cá nhân trước khi xử lý
+        String filteredQuestion = filterPersonalInfo(question);
+        
+        // Nếu câu hỏi đã bị lọc quá nhiều, trả về thông báo riêng
+        if (filteredQuestion.trim().length() < 10 && !filteredQuestion.equals(question)) {
+            return "Xin lỗi, tôi chỉ có thể trả lời các câu hỏi liên quan đến sức khỏe tâm lý và không thể xử lý thông tin cá nhân của bạn. Vui lòng chia sẻ vấn đề tâm lý bạn đang gặp phải mà không đề cập đến thông tin cá nhân cụ thể.";
+        }
+        
         // Check if we already have an answer in the database
-        Optional<ChatbotResponse> existingResponse = chatbotResponseRepository.findByQuestionContaining(question);
+        Optional<ChatbotResponse> existingResponse = chatbotResponseRepository.findByQuestionContaining(filteredQuestion);
         
         if (existingResponse.isPresent()) {
             return existingResponse.get().getAnswer();
         }
         
         // If not found, ask the AI API
-        String aiResponse = getResponseFromGemini(question);
+        String aiResponse = getResponseFromGemini(filteredQuestion);
         
-        // Save the question and answer to the database for future use
-        saveNewResponse(question, aiResponse);
+        // Save the filtered question and answer to the database for future use
+        saveNewResponse(filteredQuestion, aiResponse);
         
         return aiResponse;
     }
@@ -147,6 +292,8 @@ public class ChatbotService {
      * Get a response from Google Gemini API
      */
     private String getResponseFromGemini(String question) {
+        // Câu hỏi đã được lọc thông tin cá nhân trước khi đến đây
+        
         try {
             // Logging để gỡ lỗi
             System.out.println("--- Gọi getResponseFromGemini ---");
