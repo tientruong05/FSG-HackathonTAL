@@ -353,7 +353,7 @@ public class ChatbotService {
             // Thêm cấu hình generation
             Map<String, Object> generationConfig = new HashMap<>();
             generationConfig.put("temperature", 0.7);
-            generationConfig.put("maxOutputTokens", 500);
+            generationConfig.put("maxOutputTokens", 1500);
             requestBody.put("generationConfig", generationConfig);
             
             // Gửi request
