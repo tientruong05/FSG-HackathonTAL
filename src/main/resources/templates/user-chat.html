@@ -343,6 +343,7 @@
       let confirmEndUserChatModal = null;
       let doctorId = null;
       let currentSessionId = null;
+      let isRatingModalShown = false; // Biến cờ theo dõi trạng thái modal đánh giá
 
       // Hiển thị tin nhắn trong giao diện
       function displayMessage(msg) {
@@ -383,12 +384,25 @@
           chatMessages.appendChild(systemMessage);
           chatMessages.scrollTop = chatMessages.scrollHeight;
 
-          // Đặt hẹn giờ chuyển hướng NGAY SAU KHI hiển thị thông báo
-          console.log("Đặt hẹn giờ chuyển hướng về trang chủ sau 3 giây");
-          setTimeout(function () {
-            console.log("Đang chuyển hướng về trang chủ...");
-            window.location.href = "/home";
-          }, 3000);
+          // Chỉ chuyển hướng tự động nếu không đang hiển thị modal đánh giá
+          if (!isRatingModalShown) {
+            console.log("Đặt hẹn giờ chuyển hướng về trang chủ sau 3 giây");
+            setTimeout(function () {
+              // Kiểm tra lại lần nữa trước khi chuyển hướng
+              if (!isRatingModalShown) {
+                console.log("Đang chuyển hướng về trang chủ...");
+                window.location.href = "/home";
+              } else {
+                console.log(
+                  "Không chuyển hướng vì modal đánh giá đang hiển thị"
+                );
+              }
+            }, 3000);
+          } else {
+            console.log(
+              "Không đặt hẹn giờ chuyển hướng vì modal đánh giá đang hiển thị"
+            );
+          }
 
           return;
         }
@@ -603,14 +617,27 @@
                     chatMessages.appendChild(systemMessage);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-                    // Đặt hẹn giờ chuyển hướng NGAY SAU KHI hiển thị thông báo
-                    console.log(
-                      "Đặt hẹn giờ chuyển hướng về trang chủ sau 3 giây"
-                    );
-                    setTimeout(function () {
-                      console.log("Đang chuyển hướng về trang chủ...");
-                      window.location.href = "/home";
-                    }, 3000);
+                    // Chỉ chuyển hướng tự động nếu không đang hiển thị modal đánh giá
+                    if (!isRatingModalShown) {
+                      console.log(
+                        "Đặt hẹn giờ chuyển hướng về trang chủ sau 3 giây"
+                      );
+                      setTimeout(function () {
+                        // Kiểm tra lại lần nữa trước khi chuyển hướng
+                        if (!isRatingModalShown) {
+                          console.log("Đang chuyển hướng về trang chủ...");
+                          window.location.href = "/home";
+                        } else {
+                          console.log(
+                            "Không chuyển hướng vì modal đánh giá đang hiển thị"
+                          );
+                        }
+                      }, 3000);
+                    } else {
+                      console.log(
+                        "Không đặt hẹn giờ chuyển hướng vì modal đánh giá đang hiển thị"
+                      );
+                    }
                   }
 
                   return;
@@ -791,6 +818,7 @@
             document.getElementById("ratingModal")
           );
         }
+        isRatingModalShown = true; // Đánh dấu modal đánh giá đang hiển thị
         ratingModal.show();
       }
 
@@ -807,6 +835,7 @@
         if (!doctorId) {
           console.error("Doctor ID not found to like.");
           if (ratingModal) ratingModal.hide();
+          isRatingModalShown = false; // Đánh dấu modal đánh giá đã đóng
           window.location.href = "/home"; // Chuyển hướng về home ngay cả khi lỗi
           return;
         }
@@ -817,6 +846,7 @@
 
         if (ratingModal) {
           ratingModal.hide();
+          isRatingModalShown = false; // Đánh dấu modal đánh giá đã đóng
         }
 
         fetch(`/like-doctor/${doctorId}`, {
@@ -850,6 +880,7 @@
         // Chỉ cần đóng modal đánh giá
         if (ratingModal) {
           ratingModal.hide();
+          isRatingModalShown = false; // Đánh dấu modal đánh giá đã đóng
         }
         // Chuyển hướng về trang chủ
         window.location.href = "/home";
@@ -898,7 +929,20 @@
             document.getElementById("ratingModal")
           );
         }
+        isRatingModalShown = true; // Đánh dấu modal đánh giá đang hiển thị
         ratingModal.show();
+
+        // Lắng nghe sự kiện khi modal bị đóng bằng nút X hoặc click bên ngoài
+        document.getElementById("ratingModal").addEventListener(
+          "hidden.bs.modal",
+          function () {
+            console.log("Modal đánh giá đã bị đóng mà không có tương tác");
+            isRatingModalShown = false;
+            // Chuyển hướng về trang chủ nếu modal bị đóng mà không có tương tác
+            window.location.href = "/home";
+          },
+          { once: true }
+        ); // Chỉ thực thi một lần
       }
 
       // Hàm thực thi việc kết thúc phiên chat từ phía người dùng

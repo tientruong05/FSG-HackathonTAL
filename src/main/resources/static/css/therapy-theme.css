@@ -741,7 +741,10 @@ body.dark-mode .chat-send-button:disabled {
   background-color: var(--btn-secondary-bg);
 }
 
-/* Chatbot dark mode input styling - Có thể gộp hoặc xóa nếu style trên đã đủ */
-/* .therapy-mode .chat-input .input-group input.form-control { */
-/* ... có thể không cần nữa ... */
-/* } */
+body.dark-mode .email-link {
+  color: #6c8fb5; /* Sử dụng màu accent-primary từ theme tối */
+}
+
+body.dark-mode .email-link:hover {
+  color: #8a90b1; /* Sử dụng màu accent-tertiary từ theme tối */
+}
