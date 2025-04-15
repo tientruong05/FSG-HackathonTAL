@@ -216,4 +216,13 @@ public class UserService {
     public List<User> getDoctorsByLikes() {
         return userRepository.findByRoleRoleNameOrderByLikesDesc("doctor");
     }
+    
+    /**
+     * Lấy danh sách bác sĩ được sắp xếp theo số lượt thích giảm dần, có phân trang
+     * @param pageable Thông tin phân trang
+     * @return Page<User> Trang dữ liệu bác sĩ
+     */
+    public Page<User> getDoctorsByLikesWithPaging(Pageable pageable) {
+        return userRepository.findByRoleRoleNameOrderByLikesDesc("doctor", pageable);
+    }
 }

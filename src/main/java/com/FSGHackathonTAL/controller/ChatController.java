@@ -7,6 +7,8 @@ import com.FSGHackathonTAL.service.ChatSessionService;
 import com.FSGHackathonTAL.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -327,14 +329,17 @@ public class ChatController {
      * @return Tên view "popular-doctors".
      */
     @GetMapping("/popular-doctors")
-    public String getPopularDoctorsPage(Model model, HttpSession session) {
+    public String getPopularDoctorsPage(Model model, HttpSession session,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "9") int size) {
         User loggedInUser = getLoggedInUser(session);
         model.addAttribute("loggedInUser", loggedInUser);
         
-        // Lấy danh sách bác sĩ nổi bật từ service
+        // Lấy danh sách bác sĩ nổi bật từ service có phân trang
         try {
-            List<User> popularDoctors = userService.getDoctorsByLikes();
-            model.addAttribute("doctors", popularDoctors); // Thêm danh sách bác sĩ vào model
+            Page<User> doctorPage = userService.getDoctorsByLikesWithPaging(PageRequest.of(page, size));
+            model.addAttribute("doctors", doctorPage.getContent()); // Thêm danh sách bác sĩ vào model
+            model.addAttribute("doctorPage", doctorPage); // Thêm thông tin phân trang vào model
         } catch (Exception e) {
              // Ghi log lỗi nếu cần
              System.err.println("Error fetching popular doctors: " + e.getMessage());
@@ -342,7 +347,6 @@ public class ChatController {
              model.addAttribute("fetchError", "Không thể tải danh sách bác sĩ."); // Thêm thông báo lỗi (tùy chọn)
         }
         
-        // Dữ liệu sẽ được tải bằng JavaScript thông qua API /api/popular-doctors
         return "popular-doctors";
     }
 

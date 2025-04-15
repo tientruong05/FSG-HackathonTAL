@@ -58,4 +58,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @return Danh sách các User có vai trò được chỉ định, đã sắp xếp theo lượt thích.
      */
     List<User> findByRoleRoleNameOrderByLikesDesc(String roleName);
+
+    /**
+     * Lấy danh sách người dùng có một vai trò cụ thể, sắp xếp theo số lượt thích giảm dần, có phân trang.
+     * @param roleName Tên vai trò cần tìm kiếm (thường là 'doctor').
+     * @param pageable Thông tin phân trang.
+     * @return Trang (Page) chứa các User có vai trò được chỉ định, đã sắp xếp theo lượt thích.
+     */
+    Page<User> findByRoleRoleNameOrderByLikesDesc(String roleName, Pageable pageable);
 }
