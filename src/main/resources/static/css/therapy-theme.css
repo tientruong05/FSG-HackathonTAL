@@ -311,6 +311,14 @@ body.dark-mode .home-hero-section {
   background-attachment: fixed !important;
 }
 
+@media (max-width: 768px) {
+  body.dark-mode .home-hero-section {
+    background-attachment: scroll !important;
+    background-position: center center !important;
+    padding: 100px 0 !important;
+  }
+}
+
 body.dark-mode .home-hero-section::before {
   content: "";
   position: absolute;

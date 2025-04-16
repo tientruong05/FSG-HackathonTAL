@@ -225,6 +225,14 @@ body {
   background-attachment: fixed;
 }
 
+@media (max-width: 768px) {
+  .hero-section {
+    background-attachment: scroll;
+    background-position: center center;
+    padding: 100px 0;
+  }
+}
+
 .hero-section::before {
   content: "";
   position: absolute;
