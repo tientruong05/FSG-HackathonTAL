@@ -22,14 +22,26 @@
           };
 
           backToTopButton.addEventListener("click", function () {
-            const scrollToTop = () => {
-              const currentPosition = window.pageYOffset;
-              if (currentPosition > 0) {
-                window.requestAnimationFrame(scrollToTop);
-                window.scrollTo(0, currentPosition - currentPosition / 16);
+            const duration = 800; // Thời gian cuộn (ms) - có thể điều chỉnh
+            const startPosition = window.pageYOffset;
+            const startTime = performance.now();
+
+            function animateScroll(currentTime) {
+              const elapsedTime = currentTime - startTime;
+              const progress = Math.min(elapsedTime / duration, 1);
+              const easeInOutQuad =
+                progress < 0.5
+                  ? 2 * progress * progress
+                  : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+              window.scrollTo(0, startPosition * (1 - easeInOutQuad));
+
+              if (elapsedTime < duration) {
+                window.requestAnimationFrame(animateScroll);
               }
-            };
-            scrollToTop();
+            }
+
+            window.requestAnimationFrame(animateScroll);
           });
         });
       </script>
