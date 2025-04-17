@@ -115,6 +115,12 @@ body.dark-mode .btn-service {
   color: var(--btn-primary-text);
 }
 
+/* Thêm hiệu ứng hover cho btn-service trong dark mode */
+body.dark-mode .btn-service:hover {
+  background-color: var(--accent-secondary);
+  color: #ffffff !important; /* Đảm bảo chữ luôn trắng khi hover */
+}
+
 /* Content Sections */
 body.dark-mode .content-section,
 body.dark-mode .article-section,
@@ -151,6 +157,18 @@ body.dark-mode button.primary,
 body.dark-mode .btn-login {
   background-color: var(--btn-primary-bg);
   color: var(--btn-primary-text);
+}
+
+/* Thêm hiệu ứng hover cho btn-primary trong dark mode */
+body.dark-mode .btn-primary:hover {
+  background-color: var(--accent-secondary);
+  color: #ffffff !important; /* Đảm bảo chữ luôn trắng khi hover */
+}
+
+/* Thêm hiệu ứng hover cho btn-login trong dark mode */
+body.dark-mode .btn-login:hover {
+  background-color: var(--accent-secondary);
+  color: #ffffff !important; /* Đảm bảo chữ luôn trắng khi hover */
 }
 
 body.dark-mode .btn-secondary,
