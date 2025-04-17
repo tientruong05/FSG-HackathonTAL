@@ -357,19 +357,13 @@
                   >
                     Sửa
                   </button>
-                  <form
-                    th:action="@{/admin/articles/delete/{id}(id=${article.articleId})}"
-                    method="post"
-                    style="display: inline"
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm delete-btn"
+                    th:attr="data-id=${article.articleId}, data-type='article'"
                   >
-                    <button
-                      type="submit"
-                      class="btn btn-danger btn-sm"
-                      onclick="return confirm('Bạn có chắc muốn xóa?')"
-                    >
-                      Xóa
-                    </button>
-                  </form>
+                    Xóa
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -530,19 +524,13 @@
                   >
                     Sửa
                   </button>
-                  <form
-                    th:action="@{/admin/doctors/delete/{userId}(userId=${doctor.userId})}"
-                    method="post"
-                    style="display: inline"
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm delete-btn"
+                    th:attr="data-id=${doctor.userId}, data-type='doctor'"
                   >
-                    <button
-                      type="submit"
-                      class="btn btn-danger btn-sm"
-                      onclick="return confirm('Bạn có chắc muốn xóa?')"
-                    >
-                      Xóa
-                    </button>
-                  </form>
+                    Xóa
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -689,19 +677,13 @@
                   >
                     Sửa
                   </button>
-                  <form
-                    th:action="@{/admin/users/delete/{userId}(userId=${user.userId})}"
-                    method="post"
-                    style="display: inline"
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm delete-btn"
+                    th:attr="data-id=${user.userId}, data-type='user'"
                   >
-                    <button
-                      type="submit"
-                      class="btn btn-danger btn-sm"
-                      onclick="return confirm('Bạn có chắc muốn xóa?')"
-                    >
-                      Xóa
-                    </button>
-                  </form>
+                    Xóa
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -1006,10 +988,11 @@
                   class="form-control"
                   id="doctorPhone"
                   name="phone"
-                  pattern="^[0-9]{10,11}$"
+                  pattern="^0[0-9]{9}$"
                 />
                 <div class="invalid-feedback">
-                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                  Vui lòng nhập số điện thoại hợp lệ (10 số và bắt đầu bằng số
+                  0)
                 </div>
               </div>
               <div class="mb-3">
@@ -1117,10 +1100,11 @@
                   class="form-control"
                   id="editDoctorPhone"
                   name="phone"
-                  pattern="^[0-9]{10,11}$"
+                  pattern="^0[0-9]{9}$"
                 />
                 <div class="invalid-feedback">
-                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                  Vui lòng nhập số điện thoại hợp lệ (10 số và bắt đầu bằng số
+                  0)
                 </div>
               </div>
               <div class="mb-3">
@@ -1258,10 +1242,11 @@
                   class="form-control"
                   id="userPhone"
                   name="phone"
-                  pattern="^[0-9]{10,11}$"
+                  pattern="^0[0-9]{9}$"
                 />
                 <div class="invalid-feedback">
-                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                  Vui lòng nhập số điện thoại hợp lệ (10 số và bắt đầu bằng số
+                  0)
                 </div>
               </div>
               <div class="mb-3">
@@ -1345,10 +1330,11 @@
                   class="form-control"
                   id="editUserPhone"
                   name="phone"
-                  pattern="^[0-9]{10,11}$"
+                  pattern="^0[0-9]{9}$"
                 />
                 <div class="invalid-feedback">
-                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                  Vui lòng nhập số điện thoại hợp lệ (10 số và bắt đầu bằng số
+                  0)
                 </div>
               </div>
               <div class="mb-3">
@@ -1384,6 +1370,47 @@
       </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div
+      class="modal fade"
+      id="deleteConfirmModal"
+      tabindex="-1"
+      aria-labelledby="deleteConfirmModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmModalLabel">
+              Xác nhận xóa
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Bạn có chắc chắn muốn xóa mục này không?</p>
+            <p>Hành động này không thể hoàn tác.</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Hủy
+            </button>
+            <form id="deleteForm" method="post">
+              <button type="submit" class="btn btn-danger">Xóa</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Back to Top Button -->
     <th:block th:replace="~{fragments/back-to-top :: backToTop}"></th:block>
 
@@ -1404,6 +1431,34 @@
             alert.style.opacity = "0";
             setTimeout(() => alert.remove(), 500);
           }, 5000);
+        });
+
+        // Xử lý modal xác nhận xóa
+        const deleteModal = document.getElementById("deleteConfirmModal");
+        const deleteModalInstance = new bootstrap.Modal(deleteModal);
+        const deleteForm = document.getElementById("deleteForm");
+
+        document.querySelectorAll(".delete-btn").forEach((button) => {
+          button.addEventListener("click", function () {
+            const id = this.getAttribute("data-id");
+            const type = this.getAttribute("data-type");
+            let actionUrl = "";
+
+            switch (type) {
+              case "article":
+                actionUrl = `/admin/articles/delete/${id}`;
+                break;
+              case "doctor":
+                actionUrl = `/admin/doctors/delete/${id}`;
+                break;
+              case "user":
+                actionUrl = `/admin/users/delete/${id}`;
+                break;
+            }
+
+            deleteForm.setAttribute("action", actionUrl);
+            deleteModalInstance.show();
+          });
         });
 
         // Xử lý chuyển tab để reset phân trang về trang 1

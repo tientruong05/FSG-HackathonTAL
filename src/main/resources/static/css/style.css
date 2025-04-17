@@ -499,7 +499,7 @@ body {
   background-color: var(--primary-color);
   color: white;
   border-radius: 30px;
-  padding: 12px 28px;
+  padding: 12px 20px;
   font-size: 1rem;
   font-weight: 600;
   transition: var(--transition-normal);

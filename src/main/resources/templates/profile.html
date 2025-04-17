@@ -301,10 +301,11 @@
                   id="phone"
                   name="phone"
                   th:value="${loggedInUser.phone}"
-                  pattern="^[0-9]{10,11}$"
+                  pattern="^0[0-9]{9}$"
                 />
                 <div class="invalid-feedback">
-                  Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)
+                  Vui lòng nhập số điện thoại hợp lệ (10 số và bắt đầu bằng số
+                  0)
                 </div>
               </div>
 

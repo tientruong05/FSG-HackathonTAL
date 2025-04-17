@@ -218,7 +218,37 @@ public class ChatbotService {
         "ai có thể giúp", "ai co the giup",
         "cần lời khuyên", "can loi khuyen",
         "ai đã từng", "ai da tung",
-        "có giải pháp nào", "co giai phap nao"
+        "có giải pháp nào", "co giai phap nao",
+        
+        // Thêm từ khóa mới theo yêu cầu
+        "bực bội", "buc boi", "cáu gắt", "cau gat", "phiền não", "phien nao",
+        "lơ mơ", "lo mo", "lờ đờ", "lo do", "uể oải", "ue oai",
+        
+        // Thêm các pattern tiếp tục cuộc trò chuyện
+        "tôi đã thử", "toi da thu", "không hiệu quả", "khong hieu qua",
+        "không giúp ích", "khong giup ich", "không có tác dụng", "khong co tac dung",
+        "không cải thiện", "khong cai thien", "vẫn không khá hơn", "van khong kha hon",
+        "vẫn thế", "van the", "vẫn vậy", "van vay", "không thay đổi", "khong thay doi",
+        "thử rồi", "thu roi", "làm rồi", "lam roi", "thử qua rồi", "thu qua roi",
+        "tôi đã làm theo", "toi da lam theo", "tôi đã nghe theo", "toi da nghe theo",
+        "tôi đã áp dụng", "toi da ap dung", "tôi đã thực hiện", "toi da thuc hien",
+        "tôi đã dùng", "toi da dung", "tôi đã sử dụng", "toi da su dung",
+        "nhưng không", "nhung khong", "nhưng vẫn", "nhung van",
+        "sau khi thử", "sau khi thu", "sau khi làm", "sau khi lam",
+        "tôi vẫn cảm thấy", "toi van cam thay", "tôi vẫn thấy", "toi van thay",
+        "đã thử cách", "da thu cach", "đã làm theo cách", "da lam theo cach",
+        "tôi cố gắng", "toi co gang", "tôi đã cố", "toi da co",
+        "tôi không thấy hiệu quả", "toi khong thay hieu qua",
+        "tôi không thấy kết quả", "toi khong thay ket qua",
+        "đã thử nhiều cách", "da thu nhieu cach", "thử đủ cách", "thu du cach",
+        "thử hết cách", "thu het cach", "hết cách", "het cach",
+        "không biết phải làm sao nữa", "khong biet phai lam sao nua",
+        "không biết phải thử gì nữa", "khong biet phai thu gi nua",
+        "còn cách nào khác", "con cach nao khac", "còn phương pháp nào khác", "con phuong phap nao khac",
+        "còn mẹo nào khác", "con meo nao khac", "còn lời khuyên nào khác", "con loi khuyen nao khac",
+        "đã thử phương pháp", "da thu phuong phap", "đã thử lời khuyên", "da thu loi khuyen",
+        "còn cách khác không?", "con cach khac khong?",
+        "còn cách khác không", "con cach khac khong"
     );
 
     /**
