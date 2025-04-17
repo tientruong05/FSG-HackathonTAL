@@ -191,7 +191,34 @@ public class ChatbotService {
         "cuoc song", "cuoc doi", "khong con y nghia", "toi dau", "kho so", "dau don", 
         "dau kho qua", "song khong noi", "qua cang thang", "qua ap luc", "khong chiu noi",
         "chiu khong noi", "qua suc", "toi duoi suc", "het chiu noi", "be tac", "khong loi thoat",
-        "quan tri", "roi tri", "roi boi", "roi loan", "bat on", "kho khan", "van de", "tran tro"
+        "quan tri", "roi tri", "roi boi", "roi loan", "bat on", "kho khan", "van de", "tran tro",
+        
+        // Thêm các từ ngữ ngắn
+        "mệt", "met", "chán", "chan", "sợ", "so", "lo", "đau", "dau", "tức", "tuc", 
+        "khó", "kho", "nản", "nan", "buồn", "buon", "mông lung", "mong lung", "rối", "roi",
+        
+        // Thêm các từ ngữ liên quan đến vấn đề tâm thần
+        "khùng", "khung", "điên", "dien", "tâm thần", "tam than", "loạn thần", "loan than",
+        "thần kinh", "than kinh", "tâm bệnh", "tam benh", "mất trí", "mat tri", "lú lẫn", "lu lan",
+        "ngớ ngẩn", "ngo ngan", "kỳ quặc", "ky quac", "mộng du", "mong du", "ảo giác", "ao giac",
+        "ảo tưởng", "ao tuong", "hoang tưởng", "hoang tuong", "rối loạn", "roi loan",
+        
+        // Thêm các dạng câu hỏi
+        "còn cách nào khác không", "con cach nao khac khong", 
+        "còn cách nào", "con cach nao", 
+        "làm gì bây giờ", "lam gi bay gio", 
+        "phải làm sao", "phai lam sao", 
+        "giúp tôi với", "giup toi voi", 
+        "tôi nên làm gì", "toi nen lam gi",
+        "có cách nào không", "co cach nao khong",
+        "có ai biết không", "co ai biet khong",
+        "làm thế nào để", "lam the nao de",
+        "làm cách nào để", "lam cach nao de",
+        "giúp đỡ làm sao", "giup do lam sao",
+        "ai có thể giúp", "ai co the giup",
+        "cần lời khuyên", "can loi khuyen",
+        "ai đã từng", "ai da tung",
+        "có giải pháp nào", "co giai phap nao"
     );
 
     /**

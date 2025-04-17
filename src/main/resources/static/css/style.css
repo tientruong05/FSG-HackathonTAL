@@ -853,3 +853,13 @@ body {
   color: #3a7a68;
   text-decoration: underline;
 }
+
+/* CSS để ngăn đổi màu khi hover vào .nav-link có aria-selected="false" trong modal */
+#authTabs .nav-link[aria-selected="false"]:hover {
+  color: inherit !important;
+}
+
+/* Chỉ áp dụng hiệu ứng gạch chân cho nav-link có aria-selected="true" */
+#authTabs .nav-link[aria-selected="false"]:hover::after {
+  width: 0;
+}

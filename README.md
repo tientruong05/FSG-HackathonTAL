@@ -18,7 +18,7 @@ Dự án FSGHackathonTAL là một nền tảng trực tuyến hỗ trợ sức 
 - **Spring Security**: Xác thực và phân quyền
 - **Spring Data JPA**: Tương tác với cơ sở dữ liệu
 - **WebSocket (STOMP)**: Giao tiếp thời gian thực cho chức năng chat
-- **RESTful API**: Giao tiếp giữa client và server
+- **Thymeleaf Controllers**: Xử lý các request và render view thông qua Thymeleaf
 - **Spring Actuator**: Giám sát và quản lý ứng dụng
 - **Jakarta EE**: Jakarta Servlet, Persistence, Validation, và JSON APIs
 - **Lombok**: Giảm boilerplate code
