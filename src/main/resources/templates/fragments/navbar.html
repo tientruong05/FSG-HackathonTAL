@@ -175,6 +175,14 @@
                     >Thông tin cá nhân</a
                   >
                 </li>
+                <li
+                  class="nav-item"
+                  th:if="${loggedInUser != null && loggedInUser.role.roleName == 'user'}"
+                >
+                  <a class="dropdown-item" th:href="@{/mood}"
+                    >Nhật ký tâm trạng</a
+                  >
+                </li>
                 <li>
                   <a class="dropdown-item" th:href="@{/logout}" id="logout-link"
                     >Đăng xuất</a

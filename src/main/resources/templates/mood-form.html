@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:class="${loggedInUser != null && loggedInUser.role.roleName == 'user'} ? 'therapy-mode' : ''"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack GPT - Ghi nhận tâm trạng</title>
+    <!-- Thêm favicon -->
+    <th:block th:replace="~{fragments/therapy-theme :: favicon}"></th:block>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Thêm therapy theme fragment -->
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+    <!-- Custom CSS -->
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/style2.css}" rel="stylesheet" />
+
+    <style>
+      :root {
+        --primary-color: #4a8f7b;
+        --secondary-color: #e6e6e6;
+        --text-color: #333;
+        --light-color: #fff;
+        --dark-color: #212529;
+        --success-color: #28a745;
+        --accent-color: #f7d794;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a8f7b' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      .mood-form-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: var(--light-color);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .mood-form-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+      }
+
+      .mood-form-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--secondary-color);
+      }
+
+      .mood-form-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+      }
+
+      .mood-icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        display: block;
+      }
+
+      .form-control {
+        border-radius: 12px;
+        border: 1px solid var(--secondary-color);
+        padding: 12px 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(74, 143, 123, 0.25);
+        transform: translateY(-2px);
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 10px;
+        font-size: 1.05rem;
+      }
+
+      .btn-submit {
+        background-color: var(--primary-color);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        width: 100%;
+        font-size: 1.1rem;
+        color: var(--light-color);
+      }
+
+      .btn-submit:hover {
+        background-color: #3a7a68;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(74, 143, 123, 0.4);
+      }
+
+      .alert {
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 25px;
+        border: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .alert-success {
+        background-color: rgba(40, 167, 69, 0.15);
+        color: var(--success-color);
+      }
+
+      .alert-danger {
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
+      }
+
+      .form-floating {
+        margin-bottom: 20px;
+      }
+
+      .form-floating .form-control {
+        height: calc(3.5rem + 2px);
+        padding: 1rem 0.75rem;
+      }
+
+      .form-floating textarea.form-control {
+        height: auto;
+        min-height: 150px;
+      }
+
+      .form-floating label {
+        padding: 1rem 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar Fragment -->
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <th:block
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></th:block>
+
+    <div class="container mt-4" id="mood">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="mood-form-container">
+            <div class="mood-form-header">
+              <i class="bi bi-emoji-smile mood-icon"></i>
+              <h3 class="mood-form-title">Ghi nhận tâm trạng hôm nay</h3>
+              <p class="text-muted">
+                Chia sẻ cảm xúc của bạn để chúng tôi có thể hỗ trợ tốt hơn
+              </p>
+            </div>
+
+            <!-- Thông báo thành công/lỗi -->
+            <div
+              th:if="${successMessage}"
+              class="alert alert-success alert-dismissible fade show mb-4"
+              role="alert"
+            >
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <span th:text="${successMessage}"></span>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <div
+              th:if="${errorMessage}"
+              class="alert alert-danger alert-dismissible fade show mb-4"
+              role="alert"
+            >
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <span th:text="${errorMessage}"></span>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <form
+              th:action="@{/mood/save}"
+              method="post"
+              class="needs-validation"
+              novalidate
+            >
+              <div class="form-floating mb-3">
+                <input
+                  type="text"
+                  id="moodLevel"
+                  name="moodLevel"
+                  class="form-control"
+                  placeholder="Vui lòng nhập tâm trạng"
+                  required
+                />
+                <label for="moodLevel">Tâm trạng hiện tại</label>
+                <div class="invalid-feedback">Vui lòng nhập tâm trạng</div>
+              </div>
+
+              <div class="form-floating mb-4">
+                <textarea
+                  class="form-control"
+                  id="note"
+                  name="note"
+                  placeholder="Viết vài dòng về cảm xúc của bạn..."
+                  style="height: 150px"
+                ></textarea>
+                <label for="note">Bạn có muốn chia sẻ thêm không?</label>
+              </div>
+
+              <button type="submit" class="btn btn-submit">
+                <i class="bi bi-heart-fill me-2"></i> Lưu tâm trạng
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <th:block th:replace="~{fragments/auth-modal :: authModal}"></th:block>
+
+    <!-- Back to Top Button -->
+    <th:block th:replace="~{fragments/back-to-top :: backToTop}"></th:block>
+
+    <!-- Include Footer Fragment -->
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript cho doctor modal -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Thêm class cho các phần tử cần animation khi scroll
+        const elementsToAnimate = document.querySelectorAll(
+          ".article-card, .hero-content, .pagination-container"
+        );
+        elementsToAnimate.forEach((element, index) => {
+          element.classList.add("animate-on-scroll");
+          element.style.animationDelay = 0.15 * index + "s";
+        });
+
+        // Thêm hiệu ứng ripple cho các nút
+        const buttons = document.querySelectorAll(".btn-article, .page-link");
+        buttons.forEach((button) => {
+          button.classList.add("btn-ripple");
+        });
+
+        // Hiệu ứng khi scroll
+        function checkScroll() {
+          const elements = document.querySelectorAll(".animate-on-scroll");
+          const windowHeight = window.innerHeight;
+
+          elements.forEach((element) => {
+            const elementPosition = element.getBoundingClientRect().top;
+            if (elementPosition < windowHeight * 0.85) {
+              element.classList.add("visible");
+            }
+          });
+
+          // Hiệu ứng navbar khi scroll
+          const navbar = document.querySelector(".navbar");
+          if (window.scrollY > 100) {
+            navbar.classList.add("navbar-scrolled");
+          } else {
+            navbar.classList.remove("navbar-scrolled");
+          }
+        }
+
+        // Gọi hàm khi scroll
+        window.addEventListener("scroll", checkScroll);
+
+        // Khởi tạo lần đầu
+        checkScroll();
+
+        // Định nghĩa hàm openDoctorModal toàn cục
+        window.openDoctorModal = function () {
+          console.log("Opening doctor modal with global function");
+          const modalElement = document.getElementById("doctorSelectionModal");
+          if (modalElement) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            const loadingIndicator =
+              document.getElementById("doctorModalLoading");
+            const contentArea = document.getElementById(
+              "doctorModalBodyContent"
+            );
+
+            if (!loadingIndicator || !contentArea) {
+              console.error("Modal loading or content area not found!");
+              return;
+            }
+
+            // Show loading indicator and hide content
+            loadingIndicator.style.display = "block";
+            contentArea.style.display = "none";
+
+            // Show the modal shell immediately while loading
+            modal.show();
+
+            // Fetch updated content
+            fetch("/doctor-selection-content?_=" + new Date().getTime(), {
+              method: "GET",
+              headers: {
+                Accept: "text/html", // Expecting HTML fragment
+              },
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(
+                    "Network response was not ok: " + response.statusText
+                  );
+                }
+                return response.text();
+              })
+              .then((html) => {
+                // Replace the content area's innerHTML with the fetched fragment
+                contentArea.innerHTML = html;
+                // Hide loading and show content
+                loadingIndicator.style.display = "none";
+                contentArea.style.display = "block";
+                console.log("Modal content updated.");
+              })
+              .catch((error) => {
+                console.error(
+                  "Error fetching or updating modal content:",
+                  error
+                );
+                // Display an error message within the modal
+                contentArea.innerHTML =
+                  '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách bác sĩ. Vui lòng thử lại sau.</div>';
+                loadingIndicator.style.display = "none";
+                contentArea.style.display = "block";
+              });
+          } else {
+            console.error("Doctor selection modal element not found");
+            alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+          }
+        };
+
+        // Lắng nghe nút "Chat với bác sĩ" trong navbar
+        const chatButton = document.querySelector("#chat-doctor-navbar-btn");
+        if (chatButton) {
+          chatButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            console.log("Opening doctor modal from navbar button");
+            if (typeof openDoctorModal === "function") {
+              openDoctorModal();
+            } else {
+              console.error("openDoctorModal function not found");
+              alert("Không thể mở danh sách bác sĩ. Vui lòng thử lại sau.");
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

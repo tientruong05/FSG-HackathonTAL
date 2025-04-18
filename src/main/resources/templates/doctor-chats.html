@@ -526,6 +526,74 @@
         background-color: #5a6268;
         border-color: #545b62;
       }
+
+      /* Styles for mood notes in moods modal */
+      .mood-note-container {
+        max-height: 150px;
+        overflow-y: auto;
+        padding: 8px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        word-break: break-word;
+        line-height: 1.5;
+      }
+      
+      .mood-note-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      .mood-note-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      
+      .mood-note-container::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+      }
+      
+      .mood-note-container::-webkit-scrollbar-thumb:hover {
+        background: #999;
+      }
+      
+      #moodsModal .table-light th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+        border-bottom: none;
+      }
+      
+      #moodsModal .table tbody tr:hover {
+        background-color: rgba(74, 143, 123, 0.05);
+      }
+      
+      #moodsModal .table tbody tr {
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      #moodsModal .modal-dialog {
+        max-width: 800px;
+      }
+      
+      #moodsModal .table {
+        table-layout: fixed;
+        word-wrap: break-word;
+      }
+      
+      #moodsModal .table td {
+        vertical-align: top;
+        padding: 12px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      
+      #moodsModal .modal-body {
+        padding: 20px;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
     </style>
   </head>
   <body>
@@ -605,7 +673,13 @@
                   th:data-session-id="${chatSession.sessionId}"
                   onclick="openNotesModal(this.getAttribute('data-session-id'))"
                 >
-                  <i class="bi bi-journal-text"></i> Xem ghi chú
+                <i class="bi bi-journal-text"></i>Xem ghi chú
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  th:data-user-id="${chatSession.user.userId}"
+                  onclick="openMoodsModal(this.getAttribute('data-user-id'))"
+                >
+                <i class="bi bi-journal"></i> Xem nhật ký
                 </button>
               </div>
             </td>
@@ -850,6 +924,46 @@
       </div>
     </div>
 
+    <!-- Moods Modal -->
+    <div
+      class="modal fade"
+      id="moodsModal"
+      tabindex="-1"
+      aria-labelledby="moodsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="moodsModalLabel">Nhật ký tâm trạng của người dùng</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" width="22%">Ngày</th>
+                    <th scope="col" width="18%">Tâm trạng</th>
+                    <th scope="col" width="60%">Ghi chú</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Dữ liệu sẽ được điền bởi JavaScript -->
+                  <tr>
+                    <td colspan="3" class="text-center">Đang tải...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Confirm End Session Modal -->
     <div
       class="modal fade"
@@ -1031,6 +1145,15 @@
           });
         }
 
+// Sự kiện khi đóng modal tâm trạng
+const moodsModalElement = document.getElementById("moodsModal");
+        if (moodsModalElement) {
+          moodsModalElement.addEventListener("hidden.bs.modal", function () {
+            const { page, size } = getPaginationParams();
+            const listUrl = `/doctor/chats?page=${page}&size=${size}`;
+            history.pushState({}, "", listUrl);
+          });
+        }
         // Khởi tạo TinyMCE cho các editor
         initializeTinyMCE();
 
@@ -1642,6 +1765,28 @@
             document.getElementById("userAvatar").src =
               sessionData.userImage || "";
 
+            // Thêm nút xem nhật ký tâm trạng vào header của modal chat
+            const chatHeader = document.querySelector('.chat-header');
+            if (chatHeader) {
+                // Xóa nút cũ nếu đã có từ trước
+                const oldButton = chatHeader.querySelector('.btn-mood-history');
+                if (oldButton) {
+                    oldButton.remove();
+                }
+                
+                // Thêm nút mới
+                if (sessionData.userId) {
+                    const viewMoodsButton = document.createElement('button');
+                    viewMoodsButton.className = 'btn btn-sm btn-outline-light ms-auto btn-mood-history';
+                    viewMoodsButton.innerHTML = '<i class="bi bi-journal-text"></i> Xem nhật ký tâm trạng';
+                    viewMoodsButton.onclick = function(e) {
+                        e.preventDefault();
+                        openMoodsModal(sessionData.userId);
+                    };
+                    chatHeader.appendChild(viewMoodsButton);
+                }
+            }
+
             // Update doctor notes
             if (tinymce.get("doctorNotes")) {
               tinymce
@@ -1743,7 +1888,122 @@
             );
           });
       }
+      
+   // Đảm bảo DOM đã tải
+      document.addEventListener('DOMContentLoaded', function () {
+          // Khởi tạo moodsModal
+          const moodsModalElement = document.getElementById('moodsModal');
+          if (moodsModalElement) {
+              window.moodsModal = new bootstrap.Modal(moodsModalElement, {
+                  backdrop: 'static', // Tùy chọn: không đóng khi click bên ngoài
+                  keyboard: true // Tùy chọn: cho phép đóng bằng phím Esc
+              });
+          } else {
+              console.error('Element #moodsModal not found in DOM');
+          }
+      });
+      
+      
+      function openMoodsModal(userId) {
+    	    console.log("Opening moods modal for user ID:", userId);
 
+    	    // Hiển thị loading trong modal
+    	    const tbody = document.querySelector("#moodsModal .table tbody");
+    	    if (tbody) {
+    	        tbody.innerHTML = '<tr><td colspan="3" class="text-center">Đang tải dữ liệu...</td></tr>';
+    	    }
+    	    
+    	    // Hiển thị modal trước khi tải dữ liệu
+    	    if (typeof bootstrap !== 'undefined') {
+    	        const moodsModal = new bootstrap.Modal(document.getElementById('moodsModal'));
+    	        moodsModal.show();
+    	    } else {
+    	        console.error("Bootstrap không được định nghĩa");
+    	    }
+
+    	    // Gọi API để lấy dữ liệu tâm trạng
+    	    fetch(`/doctor/moods/${userId}`)
+    	        .then((response) => {
+    	            if (!response.ok) {
+    	                return response.text().then((text) => {
+    	                    console.error("Response error:", text);
+    	                    throw new Error(`HTTP error! Status: ${response.status}`);
+    	                });
+    	            }
+    	            return response.json();
+    	        })
+    	        .then((data) => {
+    	            console.log("Mood data received:", data);
+
+    	            // Cập nhật tiêu đề modal
+    	            const userName = data.userName || "Người dùng";
+    	            document.getElementById("moodsModalLabel").textContent = `Nhật ký tâm trạng của: ${userName}`;
+
+    	            // Cập nhật bảng dữ liệu
+    	            if (tbody) {
+    	                tbody.innerHTML = "";
+    	                
+    	                // Kiểm tra nếu không có dữ liệu
+    	                if (!data.moods || data.moods.length === 0) {
+    	                    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Người dùng chưa có ghi chép tâm trạng nào</td></tr>';
+    	                    return;
+    	                }
+    	                
+    	                // Hiển thị dữ liệu tâm trạng
+    	                data.moods.forEach((mood, index) => {
+    	                    const tr = document.createElement("tr");
+    	                    
+    	                    // Định dạng ngày tháng
+    	                    const date = new Date(mood.createdAt);
+    	                    const formattedDate = date.toLocaleDateString('vi-VN', {
+    	                        day: '2-digit',
+    	                        month: '2-digit',
+    	                        year: 'numeric',
+    	                        hour: '2-digit',
+    	                        minute: '2-digit'
+    	                    });
+    	                    
+                                // Tạo lớp CSS động cho tâm trạng
+                                let moodClass = '';
+                                const moodLower = (mood.mood || '').toLowerCase();
+                                if (moodLower.includes('vui') || moodLower.includes('hạnh phúc') || moodLower.includes('tốt')) {
+                                    moodClass = 'badge bg-success';
+                                } else if (moodLower.includes('buồn') || moodLower.includes('tệ') || moodLower.includes('chán')) {
+                                    moodClass = 'badge bg-danger';
+                                } else if (moodLower.includes('lo') || moodLower.includes('sợ') || moodLower.includes('căng')) {
+                                    moodClass = 'badge bg-warning text-dark';
+                                } else if (moodLower.includes('bình thường') || moodLower.includes('ổn')) {
+                                    moodClass = 'badge bg-info text-dark';
+                                } else {
+                                    moodClass = 'badge bg-secondary';
+                                }
+    	                        
+    	                        tr.innerHTML = `
+    	                            <td class="align-middle">${formattedDate}</td>
+    	                            <td class="align-middle"><span class="${moodClass} p-2">${mood.mood || ''}</span></td>
+    	                            <td>
+                                        <div class="mood-note-container">
+                                            ${mood.reason ? mood.reason.replace(/\n/g, '<br>') : '<em class="text-muted">Không có ghi chú</em>'}
+                                        </div>
+                                    </td>
+    	                        `;
+    	                        tbody.appendChild(tr);
+    	                    });
+    	                }
+    	        })
+    	        .catch((error) => {
+    	            console.error("Error fetching mood data:", error);
+    	            
+    	            // Hiển thị thông báo lỗi trong bảng
+    	            if (tbody) {
+    	                tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">
+    	                    <i class="bi bi-exclamation-triangle"></i> Lỗi khi tải dữ liệu: ${error.message}
+    	                </td></tr>`;
+    	            }
+    	        });
+    	}
+      
+      
       // Function to open notes modal
       function openNotesModal(sessionId) {
         // Fetch session details
@@ -2638,6 +2898,28 @@
           location.reload();
         }, 1000);
       }
+
+      // Thêm nút xem nhật ký tâm trạng vào phần header của modal chat
+      function displayChatModal() {
+        // Code hiển thị modal chat
+
+        // Thêm nút xem nhật ký tâm trạng
+        const chatHeader = document.querySelector('.chat-header');
+        if (chatHeader && sessionData.userId) {
+          const viewMoodsButton = document.createElement('button');
+          viewMoodsButton.className = 'btn btn-sm btn-outline-light ms-auto';
+          viewMoodsButton.innerHTML = '<i class="bi bi-journal-text"></i> Xem nhật ký tâm trạng';
+          viewMoodsButton.onclick = function() {
+            openMoodsModal(sessionData.userId);
+          };
+          chatHeader.appendChild(viewMoodsButton);
+        }
+      }
     </script>
+    <!-- Bootstrap CSS 
+<link th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}" rel="stylesheet">-->
+
+<!-- Bootstrap JS (bao gồm Popper.js) -->
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
   </body>
 </html>

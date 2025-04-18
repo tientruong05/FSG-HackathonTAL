@@ -4,9 +4,11 @@ import com.FSGHackathonTAL.dto.MessageDTO;
 import com.FSGHackathonTAL.entity.ChatSession;
 import com.FSGHackathonTAL.entity.User;
 import com.FSGHackathonTAL.entity.Message;
+import com.FSGHackathonTAL.entity.Mood;
 import com.FSGHackathonTAL.service.ChatSessionService;
 import com.FSGHackathonTAL.service.UserService;
 import com.FSGHackathonTAL.service.DoctorAvailabilityService;
+import com.FSGHackathonTAL.service.MoodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import java.net.URI;
 import java.util.stream.Collectors;
+import com.FSGHackathonTAL.dto.MoodDTO;
 
 /**
  * Controller quản lý các chức năng liên quan đến giao diện chat của bác sĩ.
@@ -50,6 +53,9 @@ public class DoctorChatController {
 
     @Autowired
     private DoctorAvailabilityService doctorAvailabilityService;
+
+    @Autowired
+    private MoodService moodService;
 
     /**
      * Xử lý tin nhắn đến từ bác sĩ qua WebSocket.
@@ -709,5 +715,56 @@ public class DoctorChatController {
             model.addAttribute("ajaxErrorMessage", "Lỗi khi tải lại danh sách bác sĩ.");
         }
         return "fragments/doctor-selection-content :: doctorListFragment"; // Trả về fragment
+    }
+
+    /**
+     * API endpoint để lấy nhật ký tâm trạng của một người dùng cụ thể.
+     * Được sử dụng bởi JavaScript để hiển thị trong modal khi bác sĩ muốn xem.
+     *
+     * @param userId ID của người dùng cần lấy nhật ký tâm trạng.
+     * @param session HttpSession.
+     * @return ResponseEntity chứa danh sách các entry tâm trạng hoặc lỗi.
+     */
+    @GetMapping("/doctor/moods/{userId}")
+    @ResponseBody
+    public ResponseEntity<?> getUserMoods(@PathVariable Integer userId, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null || !"doctor".equals(loggedInUser.getRole().getRoleName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Không có quyền truy cập"));
+        }
+
+        try {
+            // Kiểm tra xem người dùng có tồn tại không
+            User user = userService.getUserById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + userId));
+            
+            // Lấy danh sách entry tâm trạng
+            List<Mood> moodEntities = moodService.getMoodsByUserId(userId);
+            
+            // Chuyển đổi entities thành DTOs để tránh vấn đề serialization
+            List<MoodDTO> moodDTOs = moodEntities.stream()
+                    .map(mood -> new MoodDTO(
+                            mood.getEntry_id(), 
+                            mood.getMood(), 
+                            mood.getReason(), 
+                            mood.getCreatedAt(), 
+                            mood.getUser().getUserId(),
+                            mood.getUser().getFullName()))
+                    .collect(Collectors.toList());
+            
+            // Trả về thông tin cần thiết để tránh lỗi tuần hoàn JSON
+            Map<String, Object> response = new HashMap<>();
+            response.put("userId", userId);
+            response.put("userName", user.getFullName());
+            response.put("moods", moodDTOs);
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                              .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                              .body(Map.of("error", "Lỗi khi lấy nhật ký tâm trạng: " + e.getMessage()));
+        }
     }
 }
