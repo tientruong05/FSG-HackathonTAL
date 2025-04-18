@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:class="${loggedInUser != null && loggedInUser.role.roleName == 'user'} ? 'therapy-mode' : ''"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack GPT - Lịch sử tâm trạng</title>
+    <!-- Thêm favicon -->
+    <th:block th:replace="~{fragments/therapy-theme :: favicon}"></th:block>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Thêm therapy theme fragment -->
+    <th:block
+      th:replace="~{fragments/therapy-theme :: therapy-theme}"
+    ></th:block>
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/style2.css}" rel="stylesheet" />
+
+    <style>
+      :root {
+        --primary-color: #4a8f7b;
+        --secondary-color: #e6e6e6;
+        --text-color: #333;
+        --light-color: #fff;
+        --dark-color: #212529;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+      }
+
+      .hero-section {
+        background: linear-gradient(135deg, #4a8f7b 0%, #36735e 100%);
+        color: var(--light-color);
+        text-align: center;
+        padding: 70px 0;
+        position: relative;
+      }
+
+      .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+
+      .mood-card {
+        background-color: var(--light-color);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .mood-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      .mood-date {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .mood-level {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        margin: 10px 0;
+      }
+
+      .mood-notes {
+        color: #444;
+        font-style: italic;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background-color: #3a7a68;
+      }
+
+      .btn-danger {
+        border-radius: 25px;
+        padding: 8px 20px;
+        font-weight: 500;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 50px 0;
+      }
+
+      .empty-state i {
+        font-size: 4rem;
+        color: #ccc;
+        margin-bottom: 20px;
+      }
+
+      .empty-state h3 {
+        color: #666;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar Fragment -->
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <th:block
+      th:replace="~{fragments/doctors-modal :: doctorSelectionModal}"
+    ></th:block>
+
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Nhật ký tâm trạng</h2>
+        <a href="/mood" class="btn btn-primary">
+          <i class="bi bi-plus-circle"></i> Thêm tâm trạng mới
+        </a>
+      </div>
+
+      <!-- Thông báo thành công/lỗi -->
+      <div
+        th:if="${successMessage}"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        <span th:text="${successMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div
+        th:if="${errorMessage}"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        <span th:text="${errorMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <!-- Danh sách tâm trạng -->
+      <div th:if="${not #lists.isEmpty(moodEntries)}" class="row">
+        <div th:each="entry : ${moodEntries}" class="col-md-6 col-lg-4 mb-4">
+          <div class="mood-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <p class="mood-date">
+                <i class="bi bi-calendar"></i>
+                <span
+                  th:text="${#dates.format(entry.createdAt, 'dd/MM/yyyy HH:mm')}"
+                ></span>
+              </p>
+              <form
+                th:action="@{/mood/delete/{id}(id=${entry.entry_id})}"
+                method="post"
+                onsubmit="return confirm('Bạn có chắc chắn muốn xóa entry này?');"
+              >
+                <button type="submit" class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+            <h4 class="mood-level">
+              <i class="bi bi-emoji-smile"></i>
+              <span th:text="${entry.mood}"></span>
+            </h4>
+            <p
+              th:if="${not #strings.isEmpty(entry.reason)}"
+              class="mood-notes"
+              th:text="${entry.reason}"
+            ></p>
+            <p
+              th:if="${#strings.isEmpty(entry.reason)}"
+              class="text-muted fst-italic"
+            >
+              Không có ghi chú
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trạng thái trống -->
+      <div th:if="${#lists.isEmpty(moodEntries)}" class="empty-state">
+        <i class="bi bi-journal-text"></i>
+        <h3>Bạn chưa có nhật ký tâm trạng nào</h3>
+        <p>
+          Hãy bắt đầu ghi lại tâm trạng hàng ngày để theo dõi sức khỏe tinh thần
+          của bạn
+        </p>
+        <a href="/mood" class="btn btn-primary mt-3">
+          <i class="bi bi-plus-circle"></i> Ghi lại tâm trạng đầu tiên
+        </a>
+      </div>
+    </div>
+
+    <th:block th:replace="~{fragments/auth-modal :: authModal}"></th:block>
+
+    <!-- Back to Top Button -->
+    <th:block th:replace="~{fragments/back-to-top :: backToTop}"></th:block>
+
+    <!-- Include Footer Fragment -->
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript cho doctor modal -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Thêm class cho các phần tử cần animation khi scroll
+        const elementsToAnimate = document.querySelectorAll(
+          ".mood-card, .hero-content"
+        );
+        elementsToAnimate.forEach((element, index) => {
+          element.classList.add("animate-on-scroll");
+          element.style.animationDelay = 0.15 * index + "s";
+        });
+
+        // Hiệu ứng khi scroll
+        function checkScroll() {
+          const elements = document.querySelectorAll(".animate-on-scroll");
+          const windowHeight = window.innerHeight;
+
+          elements.forEach((element) => {
+            const elementPosition = element.getBoundingClientRect().top;
+            if (elementPosition < windowHeight * 0.85) {
+              element.classList.add("visible");
+            }
+          });
+
+          // Hiệu ứng navbar khi scroll
+          const navbar = document.querySelector(".navbar");
+          if (window.scrollY > 100) {
+            navbar.classList.add("navbar-scrolled");
+          } else {
+            navbar.classList.remove("navbar-scrolled");
+          }
+        }
+
+        // Gọi hàm khi scroll
+        window.addEventListener("scroll", checkScroll);
+
+        // Khởi tạo lần đầu
+        checkScroll();
+
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(function () {
+          document.querySelectorAll(".alert").forEach(function (alert) {
+            var bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+          });
+        }, 5000);
+      });
+    </script>
+  </body>
+</html>
