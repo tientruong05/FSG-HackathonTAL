@@ -17,6 +17,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import java.util.Collections;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 
 /**
  * Cấu hình bảo mật chính cho ứng dụng sử dụng Spring Security.
@@ -47,7 +48,17 @@ public class SecurityConfig {
                 // URLs cho tài nguyên tĩnh - cho phép truy cập không cần xác thực
                 .requestMatchers("/uploads/**", "/music/**", "/sounds/**", "/css/**", "/js/**", "/images/**", "/static/**", "/fonts/**", "/favicon.ico").permitAll()
                 // URLs công khai - cho phép truy cập không cần xác thực
-                .requestMatchers("/", "/home", "/articles", "/articles/**", "/popular-doctors", "/chill-mode").permitAll()
+                .requestMatchers("/", "/home", "/articles", "/articles/**", "/popular-doctors", "/chill-mode", "/centers", "/centers/**").permitAll()
+                // URLs cho cả người dùng chưa đăng nhập và người dùng thường
+                .requestMatchers("/centers", "/centers/**").access((authentication, object) -> {
+                    if (authentication.get() == null) {
+                        return new org.springframework.security.authorization.AuthorizationDecision(true);
+                    }
+                    Authentication authObj = authentication.get();
+                    return new org.springframework.security.authorization.AuthorizationDecision(
+                        authObj.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("user"))
+                    );
+                })
                 .requestMatchers("/ws/**", "/topic/**", "/app/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/user/login", "/user/register").permitAll()
@@ -87,7 +98,7 @@ public class SecurityConfig {
 
         return http.build();
     }
-    
+
     /**
      * Cấu hình AuthenticationManager sử dụng CustomAuthenticationProvider.
      * AuthenticationManager chịu trách nhiệm xử lý các yêu cầu xác thực.
@@ -97,7 +108,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(Collections.singletonList(authenticationProvider));
     }
-    
+
     /**
      * Cấu hình SecurityContextRepository để lưu trữ SecurityContext giữa các request.
      * Sử dụng HttpSessionSecurityContextRepository để lưu context trong session HTTP.
@@ -107,7 +118,7 @@ public class SecurityConfig {
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
     }
-    
+
     /**
      * Cấu hình PasswordEncoder.
      * Sử dụng BCryptPasswordEncoder cho mục đích mật khẩu mạnh.

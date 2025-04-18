@@ -81,6 +81,14 @@
               class="nav-item"
               th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user'}"
             >
+              <a class="nav-link fw-bold" th:href="@{/centers}"
+                >Trung tâm tư vấn</a
+              >
+            </li>
+            <li
+              class="nav-item"
+              th:if="${loggedInUser == null or loggedInUser.role.roleName == 'user'}"
+            >
               <a class="nav-link fw-bold" th:href="@{/chill-mode}">Thư giãn</a>
             </li>
 
