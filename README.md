@@ -413,3 +413,68 @@ Dự án FSGHackathonTAL là một nền tảng trực tuyến hỗ trợ sức 
     - Tìm kiếm vai trò trong database
     - Trả về thông tin vai trò nếu tìm thấy
     - Ném ngoại lệ nếu không tìm thấy vai trò
+   
+## Thông Tin Đề Tài và Thực Hiện Dự Án
+
+### 1. Tên đề tài
+
+Xây dựng Nền tảng Trực tuyến Hỗ trợ Sức khỏe Tâm lý
+
+### 2. Cách thức thực hiện (Các bước chi tiết)
+
+1.  **Giai đoạn Phân tích & Thiết kế:**
+    *   **Xác định yêu cầu:** Định nghĩa yêu cầu chức năng (đăng nhập/đăng ký, chat bác sĩ, chatbot AI, bài viết, trạng thái bác sĩ, thư giãn) và phi chức năng (bảo mật, hiệu năng).
+    *   **Thiết kế kiến trúc:** Lựa chọn kiến trúc Monolithic (Spring Boot), render phía server với **Thymeleaf** làm chủ đạo, kết hợp **API endpoints** cho các tác vụ động và **WebSocket (STOMP)** cho chat thời gian thực. Cơ sở dữ liệu là MySQL.
+    *   **Thiết kế UI/UX:** Phác thảo giao diện cho các trang Thymeleaf (`home`, `chat`, `chatbot`, `articles`, `doctor-dashboard`, `IDWTDA.html`) sử dụng Bootstrap 5.
+    *   **Thiết kế Database:** Định nghĩa schema cho MySQL (Users, Roles, Articles, ChatSessions, Messages, etc.).
+    *   **Thiết kế Endpoints:**
+        *   Định nghĩa các request mapping cho Thymeleaf Controllers để trả về view HTML.
+        *   Thiết kế các **API endpoints** (tiền tố `/api/`) cho các tương tác JavaScript (AJAX/Fetch) từ phía client (e.g., gửi/nhận tin nhắn chatbot, lấy lịch sử chat, cập nhật trạng thái).
+        *   Thiết kế các **WebSocket endpoints** (STOMP) cho việc gửi/nhận tin nhắn chat real-time.
+
+2.  **Giai đoạn Phát triển Backend (Java 23, Spring Boot 3.4.4):**
+    *   **Thiết lập dự án & Data Layer:** Cấu hình Spring Boot, tạo Entities (Lombok) và Repositories (Spring Data JPA) cho MySQL.
+    *   **Service Layer:** Xây dựng các Services (`UserService`, `ChatSessionService`, `ChatbotService`, etc.) chứa logic nghiệp vụ.
+    *   **Controller Layer:**
+        *   Tạo các `@Controller` để xử lý request, chuẩn bị Model, và trả về tên view **Thymeleaf**.
+        *   Tạo các `@RestController` hoặc các phương thức `@ResponseBody` trong `@Controller` để xử lý các **API endpoints** (nhận/trả JSON qua DTOs).
+    *   **Bảo mật:** Tích hợp Spring Security (xác thực, phân quyền USER/DOCTOR).
+    *   **Chat Real-time & Chatbot:** Cấu hình WebSocket (STOMP) trong `ChatController`/`DoctorChatController`. Tích hợp Google Gemini API trong `ChatbotService` và gọi qua endpoint `/api/chatbot/message`.
+    *   **Quản lý trạng thái bác sĩ:** Implement `DoctorAvailabilityService` và endpoint `/api/doctor/availability`.
+
+3.  **Giai đoạn Phát triển Frontend (Thymeleaf, Bootstrap 5, JavaScript):**
+    *   **Xây dựng Giao diện:** Tạo các file template `.html` với **Thymeleaf**, sử dụng fragments và Bootstrap 5.
+    *   **Xử lý tương tác (JavaScript):**
+        *   Viết mã JavaScript/jQuery để xử lý sự kiện trên các trang Thymeleaf.
+        *   Thực hiện các cuộc gọi **AJAX/Fetch** đến các **API endpoints** (`/api/...`) để gửi/nhận dữ liệu động (JSON) mà không cần tải lại trang.
+        *   Tích hợp **WebSocket Client (SockJS, STOMP.js)** trong các trang chat để kết nối, gửi/nhận tin nhắn real-time.
+
+4.  **Giai đoạn Tích hợp và Kiểm thử:**
+    *   **Kiểm thử:** Unit Test (Services), Integration Test (Controller-Service-Repo, API endpoints, WebSocket), UI Test, UAT.
+
+5.  **Giai đoạn Triển khai & Bàn giao:**
+    *   **Triển khai:** Cấu hình môi trường, build (JAR/WAR), deploy.
+    *   **Bàn giao:** Cung cấp mã nguồn, tài liệu `README.md`, script DB.
+
+### 3. Kết quả dự kiến và Phương thức chuyển giao
+
+*   **Kết quả dự kiến:**
+    *   **Ứng dụng web hoàn chỉnh:** Hoạt động trên nền tảng Spring Boot với giao diện được render chính bằng **Thymeleaf**, tích hợp các tính năng động thông qua **API endpoints** và **WebSocket**:
+        *   Xác thực/phân quyền (USER/DOCTOR).
+        *   Chat thời gian thực (WebSocket).
+        *   Chatbot AI (Gọi qua API endpoint).
+        *   Quản lý bài viết (Thymeleaf).
+        *   Xem trạng thái bác sĩ (Cập nhật qua API endpoint).
+        *   Trang thư giãn (Thymeleaf).
+        *   Dashboard bác sĩ (Thymeleaf + API calls).
+    *   **Mã nguồn có cấu trúc tốt.**
+    *   **Giao diện người dùng:** Thân thiện, responsive (Bootstrap 5).
+    *   **Tài liệu:** `README.md` chi tiết.
+
+*   **Phương thức chuyển giao:**
+    *   **Mã nguồn (Source Code):** Trên Git (Backend Java/Spring, Frontend Thymeleaf/JS).
+    *   **Tài liệu dự án:** `README.md` cập nhật.
+    *   **Cơ sở dữ liệu:** Script SQL (schema, data).
+    *   **(Tùy chọn) Hướng dẫn triển khai.**
+    *   **(Tùy chọn) Bản Demo.**
+
